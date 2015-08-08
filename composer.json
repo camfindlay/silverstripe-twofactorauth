@@ -31,7 +31,12 @@
 		"installer-name": "twofactorauth",
 		"branch-alias": {
 			"dev-master": "1.0.x-dev"
-		}
+		},
+		"screenshots": [
+			"docs/en/_images/2fa-token-qr.png",
+			"docs/en/_images/2fa-login.png",
+			"docs/en/_images/2fa-backup.png"
+		]
 	},
 	"replace" : {
         "91carriage/2fa": "*"

@@ -1,4 +1,4 @@
-# 2 factor authentication for SilverStripe CMS
+# Two factor authentication for SilverStripe CMS
 
 Enable two factor authentication Timed One-Time Password) for SilverStripe CMS using QR codes and Google Authenticator app.
 
@@ -12,12 +12,22 @@ Enable two factor authentication Timed One-Time Password) for SilverStripe CMS u
 composer require camfindlay/silverstripe-twofactorauth
 ```
 
-## Configuration
-See [Configuration documentation](docs/en/configuration.md)
+## Documentation
+### Configuration
+See [Configuration](docs/en/configuration.md) documentation
 
-## Usage
-
-
+### User guide
+See [User guide](docs/en/userguide.md) documentation
 
 ## Maintainers
 - Cam Findlay <cam@silverstripe.com>
+
+## Contributing
+See [Contributing documentation and license agreement](CONTRIBUTING.md)
+
+## Changelog
+See [Module releases](https://github.com/camfindlay/silverstripe-twofactorauth/releases/)
+
+## License
+Code is license under the BSD 3-Clause Open Source license.
+See [License](LICENSE.md)
