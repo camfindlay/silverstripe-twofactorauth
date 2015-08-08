@@ -55,7 +55,7 @@ class Member extends \DataExtension {
 		return null;
 	}
 
-	public function updateCMSFields(FieldList $fields) {
+	public function updateCMSFields(\FieldList $fields) {
 		if ($this->owner->Has2FA) {
 			// HACK HACK HACK
 			$field = \LiteralField::create(
