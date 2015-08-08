@@ -1,0 +1,39 @@
+{
+	"name": "camfindlay/silverstripe-twofactorauth",
+	"type": "silverstripe-module",
+	"description": "Adds 2 factor authentication to SilverStripe CMS",
+	"license": "BSD-3-Clause",
+	"keywords": ["silverstripe", "2fa", "otp", "security", "authentication"],
+	"require": {
+		"rych/otp": "1.1.*",
+		"endroid/qrcode": "1.3.*",
+		"silverstripe/framework": "~3.1"
+	},
+	"authors": [
+		{
+			"name": "Simon Welsh",
+			"email": "simon@simon.geek.nz",
+			"homepage": "http://coding.simon.geek.nz/"
+		},
+		{
+			"name": "Cam Findlay",
+			"email": "cam@silverstripe.com"
+		}
+
+	],
+	"homepage": "https://github.com/camfindlay/silverstripe-twofactorauth",
+	"support": {
+		"issues": "https://github.com/camfindlay/silverstripe-twofactorauth/issues",
+		"source": "https://github.com/camfindlay/silverstripe-twofactorauth/tree/master",
+		"irc": "irc://irc.freenode.org/#silverstripe"
+	},
+	"extra": {
+		"installer-name": "twofactorauth",
+		"branch-alias": {
+			"dev-master": "1.0.x-dev"
+		}
+	},
+	"replace" : {
+        "91carriage/2fa": "*"
+    }
+}

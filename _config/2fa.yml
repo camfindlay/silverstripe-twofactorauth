@@ -1,0 +1,15 @@
+---
+Name: 2fa
+---
+Member:
+  extensions:
+    - '_2fa\Member'
+Injector:
+  MemberLoginForm:
+    class: '_2fa\LoginForm'
+  ChangePasswordForm:
+    class: '_2fa\ChangePasswordForm'
+  CMSMemberLoginForm:
+    class: '_2fa\NonExistent'
+CMSSecurity:
+  reauth_enabled: false
