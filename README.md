@@ -1,6 +1,6 @@
 # Two factor authentication for SilverStripe CMS
 
-Enable two factor authentication Timed One-Time Password) for SilverStripe CMS using QR codes and Google Authenticator app.
+Enable two factor authentication (Timed One-Time Password) for SilverStripe CMS using QR codes.
 
 ## Requirements
 - SilverStripe Framework 3.1
