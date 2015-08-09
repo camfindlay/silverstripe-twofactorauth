@@ -12,6 +12,9 @@ Setting up two factor authentication can only be performed by a CMS user with pe
 
 ![Security token prompt](_images/2fa-login.png)
 
+## Installing Google Authenticator
+See the [installation instructions for various mobile devices](https://support.google.com/accounts/answer/1066447?hl=en).
+
 ## Setting backup tokens
 You can set up backup security tokens just in case you lose access to your second factor device.
 
