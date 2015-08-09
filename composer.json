@@ -9,6 +9,12 @@
 		"endroid/qrcode": "1.3.*",
 		"silverstripe/framework": "~3.1"
 	},
+	"conflict": {
+		"91carriage/2fa": "*"
+	},
+	"replace" : {
+        "91carriage/2fa": "*"
+    },
 	"authors": [
 		{
 			"name": "Simon Welsh",
@@ -34,8 +40,5 @@
 			"docs/en/_images/2fa-login.png",
 			"docs/en/_images/2fa-backup.png"
 		]
-	},
-	"replace" : {
-        "91carriage/2fa": "*"
-    }
+	}
 }
