@@ -85,9 +85,11 @@ class LoginForm extends \MemberLoginForm
         if ($field) {
             return parent::Fields();
         }
+        $security_token = $this->getSecurityToken();
         $fields = \FieldList::create(
             \TextField::create('TOTP', 'Security Token'),
-            \HiddenField::create('BackURL', null, Session::get('BackURL'))
+            \HiddenField::create('BackURL', null, Session::get('BackURL')),
+            \HiddenField::create($security_token->getName(), null, $security_token->getSecurityID())
         );
         foreach ($this->getExtraFields() as $field) {
             if (!$fields->fieldByName($field->getName())) {
