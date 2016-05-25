@@ -1,4 +1,5 @@
 <?php
+
 namespace _91Carriage;
 
 /**
@@ -22,7 +23,7 @@ class BackupToken extends \DataObject
     );
 
     /**
-     * Migrates the old namespace to new
+     * Migrates the old namespace to new.
      */
     public function requireDefaultRecords()
     {

@@ -11,5 +11,7 @@ Injector:
     class: '_2fa\ChangePasswordForm'
   CMSMemberLoginForm:
     class: '_2fa\NonExistent'
+  CMSProfileController:
+    class: '_2fa\CMSProfileController'
 CMSSecurity:
   reauth_enabled: false
