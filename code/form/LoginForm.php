@@ -79,14 +79,21 @@ class LoginForm extends \MemberLoginForm
         $this->controller->redirect($loginLink);
     }
 
+    public function Actions()
+    {
+        $actions = parent::Actions();
+        $fields = $this->Fields();
+
+        // Remove the lost-password action from the TOTP token form
+        if ($fields->fieldByName('TOTP')) {
+            $actions->removeByName('forgotPassword');
+        }
+        return $actions;
+    }
+
     public function Fields()
     {
         if (!Session::get('TOTP.ID')) {
-            return parent::Fields();
-        }
-        $actions = $this->Actions();
-        $field = $actions->fieldByName('action_forgotPassword');
-        if ($field) {
             return parent::Fields();
         }
         $security_token = $this->getSecurityToken();
