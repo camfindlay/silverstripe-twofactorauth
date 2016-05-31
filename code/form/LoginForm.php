@@ -17,15 +17,18 @@ class LoginForm extends \MemberLoginForm
                 $member = \Member::get()->byID(Session::get('TOTP.ID'));
                 if (!$member) {
                     Session::clear('TOTP.ID');
+
                     return $this->returnToForm();
                 }
                 if ($member->validateTOTP($data['TOTP'])) {
                     Session::clear('TOTP.ID');
                     $member->LogIn(Session::get('TOTP.Remember'));
                     $data = array('Remember' => Session::get('TOTP.Remember'));
+
                     return $this->logInUserAndRedirect($data);
                 } else {
                     $this->sessionMessage('Incorrect security token', 'bad');
+
                     return $this->returnToForm();
                 }
             }
@@ -40,6 +43,7 @@ class LoginForm extends \MemberLoginForm
                     Session::set('TOTP.Remember', !empty($data['Remember']));
                 } else {
                     $member->LogIn(!empty($data['Remember']));
+
                     return $this->logInUserAndRedirect($data);
                 }
             } else {
@@ -69,9 +73,9 @@ class LoginForm extends \MemberLoginForm
             $this->controller->Link('login')
         );
         if ($backURL) {
-            $loginLink .= '?BackURL=' . urlencode($backURL);
+            $loginLink .= '?BackURL='.urlencode($backURL);
         }
-        $loginLink .= '#' . $this->FormName() . '_tab';
+        $loginLink .= '#'.$this->FormName().'_tab';
         $this->controller->redirect($loginLink);
     }
 
@@ -85,15 +89,18 @@ class LoginForm extends \MemberLoginForm
         if ($field) {
             return parent::Fields();
         }
+        $security_token = $this->getSecurityToken();
         $fields = \FieldList::create(
             \TextField::create('TOTP', 'Security Token'),
-            \HiddenField::create('BackURL', null, Session::get('BackURL'))
+            \HiddenField::create('BackURL', null, Session::get('BackURL')),
+            \HiddenField::create($security_token->getName(), null, $security_token->getSecurityID())
         );
         foreach ($this->getExtraFields() as $field) {
             if (!$fields->fieldByName($field->getName())) {
                 $fields->push($field);
             }
         }
+
         return $fields;
     }
 }

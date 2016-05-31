@@ -6,6 +6,13 @@ use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
 use Endroid\QrCode\QrCode;
 
+/**
+ * @property \Member $owner
+ * @property bool $Has2FA
+ * @property string $TOTPToken
+ *
+ * @method BackupToken BackupTokens()
+ */
 class Member extends \DataExtension
 {
     private static $db = array(
@@ -16,6 +23,8 @@ class Member extends \DataExtension
     private static $has_many = array(
         'BackupTokens' => '_2fa\BackupToken',
     );
+
+    private static $admins_can_disable = false;
 
     private static $totp_window = 2;
 
@@ -30,16 +39,22 @@ class Member extends \DataExtension
         if (!$seed) {
             return true;
         }
-        $window = (int)\Config::inst()->get(__CLASS__, 'totp_window');
+        $window = (int) \Config::inst()->get(__CLASS__, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
 
         $valid = $totp->validate($token);
 
+        // Check backup tokens if unsuccessful
         if (!$valid) {
-            foreach ($this->owner->BackupTokens() as $bt) {
-                if ($bt->Value == $token) {
+            $backup_tokens = $this->owner->BackupTokens()->filter('Value', $token);
+            if ($backup_tokens->count()) {
+                $candidate_backup_token = $backup_tokens->first();
+                if ($token === $candidate_backup_token->Value) {
                     $valid = true;
-                    if ($bt::config()->single_use) {
+
+                    // Backup tokens should be unique;
+                    // ensure any duplicates are deleted when successfully used
+                    foreach ($backup_tokens as $bt) {
                         $bt->delete();
                     }
                 }
@@ -52,6 +67,7 @@ class Member extends \DataExtension
     public function getPrintableTOTPToken()
     {
         $seed = $this->OTPSeed();
+
         return $seed ? $seed->getValue(Seed::FORMAT_BASE32) : '';
     }
 
@@ -60,32 +76,22 @@ class Member extends \DataExtension
         if ($this->owner->TOTPToken) {
             return new Seed($this->owner->TOTPToken);
         }
-        return null;
+
+        return;
     }
 
+    /**
+     * Allow other admins to turn off 2FA if it is set & admins_can_disable is set in the config.
+     * 2FA in general is managed in the user's own profile.
+     *
+     * @param \FieldList $fields
+     */
     public function updateCMSFields(\FieldList $fields)
     {
-        if ($this->owner->Has2FA) {
-            // HACK HACK HACK
-            $field = \LiteralField::create(
-                'PrintableTOTPToken',
-                sprintf(
-                    '<div id="PrintableTOTPToken" class="field readonly">
-	<label class="left" for="Form_EditForm_PrintableTOTPToken">TOTP Token</label>
-	<div class="middleColumn">
-	<span id="Form_EditForm_PrintableTOTPToken" class="readonly">
-		%s<br />
-<img src="%s" width=175 height=175 />
-	</span>
-	</div>
-</div>',
-                    $this->getPrintableTOTPToken(),
-                    $this->generateQRCode()
-                )
-            );
-            $fields->replaceField('TOTPToken', $field);
-        } else {
-            $fields->removeByName('TOTPToken');
+        $fields->removeByName('TOTPToken');
+        $fields->removeByName('BackupTokens');
+        if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
+            $fields->removeByName('Has2FA');
         }
     }
 
@@ -98,6 +104,17 @@ class Member extends \DataExtension
     {
         $seed = Seed::generate($bytes);
         $this->owner->TOTPToken = $seed->getValue(Seed::FORMAT_HEX);
+    }
+
+    /**
+     * Delete a member's backup tokens when deleting the member.
+     */
+    public function onBeforeDelete()
+    {
+        foreach ($this->owner->BackupTokens() as $bt) {
+            $bt->delete();
+        }
+        parent::onBeforeDelete();
     }
 
     public function onBeforeWrite()
@@ -117,6 +134,7 @@ class Member extends \DataExtension
             $issuer = $issuer[0];
         }
         $label = sprintf('%s: %s', $issuer, $this->owner->Name);
+
         return sprintf(
             'otpauth://totp/%s?secret=%s&issuer=%s',
             rawurlencode($label),
@@ -133,6 +151,7 @@ class Member extends \DataExtension
         $qrCode->setPadding(10);
         $data = $qrCode->get(QrCode::IMAGE_TYPE_GIF);
         $data = base64_encode($data);
+
         return sprintf('data:image/gif;base64,%s', $data);
     }
 }

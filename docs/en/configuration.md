@@ -1,6 +1,6 @@
 # Configuration
 
-All configuration is done through the [Configuration API](http://doc.silverstripe.org/framework/en/3.1/topics/configuration). 
+All configuration is done through the [Configuration API](http://doc.silverstripe.org/framework/en/3.1/topics/configuration).
 
 ## Options
 
@@ -9,17 +9,14 @@ All configuration is done through the [Configuration API](http://doc.silverstrip
  accepted. **Note:** this is the total size of the window, not the size either
  side of the current token. For example, the default value of 2 allows for users
  to specify the previous or the next tokens as well as the current one.
- 
- * `_2fa\BackupToken.single_use` -- If backup tokens are single use. If
- set to true, if a backup token is used to login then it is deleted. Defaults to
- true.
+* `_2fa\admins_can_disable` -- Default false. If set to true, then the 2FA
+ option appears in the Security section, which allows an admin to turn 2FA _off_,
+ but not _on_. Only the Member can turn 2FA _on_.
 
 ## Example configuration
 ```yaml
  _2fa\Member:
    totp_window: 2
- _2fa\BackupToken:
-   single_use: true
 ```
 
 ## Note about SilverStripe CMS reauthentication (3.1.7 upwards)
