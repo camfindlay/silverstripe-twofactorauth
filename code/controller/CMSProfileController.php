@@ -20,17 +20,22 @@ class CMSProfileController extends \CMSProfileController
         $fields->removeByName('BackupTokens');
         $two_factor_fields = [\CheckboxField::create('Has2FA', 'Enable Two Factor Authentication', $member->Has2FA)];
         if ($member->Has2FA) {
-            $two_factor_fields[] = \LiteralField::create(
+            $two_factor_fields[] = \LiteralField::create('SecurityWarning',
+                    '<p>The button below reveals your security token for scanning and any backup tokens you may have. '.
+                    'Please reveal them only when no one else is observing your screen.');
+            $two_factor_fields[] = \ToggleCompositeField::create('SecurityTokens', 'Security tokens', [
+            \LiteralField::create(
                 'PrintableTOTPToken',
                 sprintf('<div id="PrintableTOTPToken" class="field readonly">'.
                         '<label class="left" for="Form_EditForm_PrintableTOTPToken">TOTP Token</label>'.
                         '<div class="middleColumn">'.
                         '<span id="Form_EditForm_PrintableTOTPToken" class="readonly">%s<br />'.
                         '<img src="%s" width=175 height=175 /></span>'.
-                        '</div></div>', $member->getPrintableTOTPToken(), $member->generateQRCode()));
-            $two_factor_fields[] = \LiteralField::create('DisplayBackupTokens', implode('<br />', [
-                '<b>Backup Tokens:</b> Please copy these and keep in a safe place.',
-                implode('<br />', $member->BackupTokens()->column('Value')), ]));
+                        '</div></div>', $member->getPrintableTOTPToken(), $member->generateQRCode())),
+            \LiteralField::create('DisplayBackupTokens', '<div id="DisplayBackupTokens" class="field readonly">'.
+                '<p><b>Backup Tokens:</b> Please copy these and keep in a safe place.</p>'.
+                implode('<br />', $member->BackupTokens()->column('Value')).'</div>'), ]
+            );
         }
         $fields->addFieldsToTab('Root.TwoFactorAuthentication', $two_factor_fields);
         if ($member->Has2FA) {
