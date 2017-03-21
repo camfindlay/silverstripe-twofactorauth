@@ -1,6 +1,6 @@
 <?php
 
-namespace _2fa;
+namespace _2fa\Extensions;
 
 use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
