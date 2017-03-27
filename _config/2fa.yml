@@ -3,7 +3,7 @@ Name: 2fa
 ---
 Member:
   extensions:
-    - '_2fa\Member'
+    - '_2fa\Extensions\Member'
 Injector:
   MemberLoginForm:
     class: '_2fa\LoginForm'

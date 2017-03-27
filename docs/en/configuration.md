@@ -4,7 +4,7 @@ All configuration is done through the [Configuration API](http://doc.silverstrip
 
 ## Options
 
- * `_2fa\Member.totp_window` -- The number of tokens in the window users
+ * `_2fa\Extensions\Member.totp_window` -- The number of tokens in the window users
  have to get a correct token. If this is 0, then only the current token is
  accepted. **Note:** this is the total size of the window, not the size either
  side of the current token. For example, the default value of 2 allows for users
@@ -15,7 +15,7 @@ All configuration is done through the [Configuration API](http://doc.silverstrip
 
 ## Example configuration
 ```yaml
- _2fa\Member:
+ _2fa\Extensions\Member:
    totp_window: 2
 ```
 
