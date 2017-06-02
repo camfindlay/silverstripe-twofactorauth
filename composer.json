@@ -44,6 +44,11 @@
     "source": "https://github.com/camfindlay/silverstripe-twofactorauth/tree/master",
     "irc": "irc://irc.freenode.org/#silverstripe"
   },
+  "autoload": {
+      "psr-4": {
+          "_2fa\\": "src/"
+      }
+  },
   "extra": {
     "installer-name": "twofactorauth",
     "screenshots": [
