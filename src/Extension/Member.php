@@ -5,6 +5,12 @@ namespace _2fa\Extensions;
 use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
 use Endroid\QrCode\QrCode;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Security\Permission;
+use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\ORM\DataExtension;
+
 
 /**
  * @property \Member $owner
@@ -13,7 +19,7 @@ use Endroid\QrCode\QrCode;
  *
  * @method BackupToken BackupTokens()
  */
-class Member extends \DataExtension
+class Member extends DataExtension
 {
     private static $db = array(
         'Has2FA' => 'Boolean',
@@ -46,7 +52,7 @@ class Member extends \DataExtension
         if (!$seed) {
             return true;
         }
-        $window = (int) \Config::inst()->get(__CLASS__, 'totp_window');
+        $window = (int) Config::inst()->get(__CLASS__, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
 
         $valid = $totp->validate($token);
@@ -93,7 +99,7 @@ class Member extends \DataExtension
      *
      * @param \FieldList $fields
      */
-    public function updateCMSFields(\FieldList $fields)
+    public function updateCMSFields(FieldList $fields)
     {
         // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
         if(!$this->owner->TOTPToken && self::validated_activation_mode()) {
@@ -103,7 +109,7 @@ class Member extends \DataExtension
 
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
-        if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
+        if (!(Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && Permission::check('ADMIN'))) {
             $fields->removeByName('Has2FA');
         }
     }
@@ -140,8 +146,8 @@ class Member extends \DataExtension
 
     public function getOTPUrl()
     {
-        if (class_exists('SiteConfig')) {
-            $config = \SiteConfig::current_site_config();
+        if (class_exists(SiteConfig::class)) {
+            $config = SiteConfig::current_site_config();
             $issuer = $config->Title;
         } else {
             $issuer = explode(':', $_SERVER['HTTP_HOST']);

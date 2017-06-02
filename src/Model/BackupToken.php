@@ -1,20 +1,23 @@
 <?php
 
 namespace _2fa;
+use SilverStripe\Security\Member;
+use SilverStripe\ORM\DataObject;
+
 
 /**
  * @property string $Value
  *
  * @method \Member Member()
  */
-class BackupToken extends \DataObject
+class BackupToken extends DataObject
 {
     private static $db = array(
         'Value' => 'Varchar',
     );
 
     private static $has_one = array(
-        'Member' => 'Member',
+        'Member' => Member::class,
     );
 
     private static $summary_fields = array(

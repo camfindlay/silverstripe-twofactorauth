@@ -1,19 +1,19 @@
 ---
 Name: 2fa
 ---
-Member:
+SilverStripe\Security\Member:
   extensions:
-    - '_2fa\Extensions\Member'
-Injector:
-  MemberLoginForm:
-    class: '_2fa\LoginForm'
-  ChangePasswordForm:
-    class: '_2fa\ChangePasswordForm'
-  CMSMemberLoginForm:
-    class: '_2fa\NonExistent'
-  CMSProfileController:
-    class: '_2fa\CMSProfileController'
-CMSSecurity:
+    - _2fa\Extensions\Member
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\MemberLoginForm:
+    class: _2fa\LoginForm
+  SilverStripe\Security\ChangePasswordForm:
+    class: _2fa\ChangePasswordForm
+  SilverStripe\Security\CMSMemberLoginForm:
+    class: _2fa\NonExistent
+  SilverStripe\Admin\CMSProfileController:
+    class: _2fa\CMSProfileController
+SilverStripe\Security\CMSSecurity:
   reauth_enabled: false
 
 LeftAndMain:

@@ -2,9 +2,12 @@
 
 namespace _2fa;
 
-use Member;
 
-class ChangePasswordForm extends \ChangePasswordForm
+use SilverStripe\Security\Member;
+use SilverStripe\Security\ChangePasswordForm;
+
+
+class ChangePasswordForm extends ChangePasswordForm
 {
     public function doChangePassword(array $data)
     {

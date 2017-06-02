@@ -1,6 +1,10 @@
 <?php
 
 namespace _91Carriage;
+use SilverStripe\Security\Member;
+use SilverStripe\ORM\DB;
+use SilverStripe\ORM\DataObject;
+
 
 /**
  * This namespaced class is kept to provide for migration of data across tables.
@@ -8,14 +12,14 @@ namespace _91Carriage;
  * DEPRECATION WARNING: Ensure you use _2fa\BackupToken for any extensions of the modules code. 
  * This class will be removed at some point in the future (likely any 2.x release).
  **/
-class BackupToken extends \DataObject
+class BackupToken extends DataObject
 {
     private static $db = array(
         'Value' => 'Varchar',
     );
 
     private static $has_one = array(
-        'Member' => 'Member',
+        'Member' => Member::class,
     );
 
     private static $summary_fields = array(
@@ -38,7 +42,7 @@ class BackupToken extends \DataObject
                 $migrate->write(false, true, true);
                 $token->delete();
             }
-            \DB::alteration_message('Two factor auth backup tokens migrated from version 1.0.x to 1.1.x', 'obsolete');
+            DB::alteration_message('Two factor auth backup tokens migrated from version 1.0.x to 1.1.x', 'obsolete');
         }
     }
 

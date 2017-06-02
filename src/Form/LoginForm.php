@@ -2,10 +2,19 @@
 
 namespace _2fa;
 
-use Session;
-use Director;
 
-class LoginForm extends \MemberLoginForm
+
+use SilverStripe\Control\Session;
+use SilverStripe\Security\Member;
+use SilverStripe\Control\Email\Email;
+use SilverStripe\Control\Director;
+use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\HiddenField;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\Security\MemberLoginForm;
+
+
+class LoginForm extends MemberLoginForm
 {
     private static $allowed_actions = array('cancel');
 
@@ -24,7 +33,7 @@ class LoginForm extends \MemberLoginForm
             if (empty($data['TOTP'])) {
                 return $this->returnToForm();
             } else {
-                $member = \Member::get()->byID(Session::get('TOTP.ID'));
+                $member = Member::get()->byID(Session::get('TOTP.ID'));
                 if (!$member) {
                     Session::clear('TOTP.ID');
 
@@ -58,7 +67,7 @@ class LoginForm extends \MemberLoginForm
                 }
             } else {
                 Session::set('SessionForms.MemberLoginForm.Email',
-                    $data['Email']);
+                    $data[Email::class]);
                 Session::set('SessionForms.MemberLoginForm.Remember',
                     !empty($data['Remember']));
             }
@@ -110,10 +119,10 @@ class LoginForm extends \MemberLoginForm
             return parent::Fields();
         }
         $security_token = $this->getSecurityToken();
-        $fields = \FieldList::create(
-            \TextField::create('TOTP', 'Security Token'),
-            \HiddenField::create('BackURL', null, Session::get('BackURL')),
-            \HiddenField::create($security_token->getName(), null, $security_token->getSecurityID())
+        $fields = FieldList::create(
+            TextField::create('TOTP', 'Security Token'),
+            HiddenField::create('BackURL', null, Session::get('BackURL')),
+            HiddenField::create($security_token->getName(), null, $security_token->getSecurityID())
         );
         foreach ($this->getExtraFields() as $field) {
             if (!$fields->fieldByName($field->getName())) {
