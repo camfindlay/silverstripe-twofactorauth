@@ -7,10 +7,10 @@ use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Admin\CMSProfileController;
+use SilverStripe\Admin\CMSProfileController as SS_CMSProfileController;
 
 
-class CMSProfileController extends CMSProfileController
+class CMSProfileController extends SS_CMSProfileController
 {
     private static $allowed_actions = [
         'regenerate_backup_tokens',

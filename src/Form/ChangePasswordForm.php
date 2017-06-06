@@ -4,10 +4,10 @@ namespace _2fa;
 
 
 use SilverStripe\Security\Member;
-use SilverStripe\Security\ChangePasswordForm;
+use SilverStripe\Security\ChangePasswordForm as SS_ChangePasswordForm;
 
 
-class ChangePasswordForm extends ChangePasswordForm
+class ChangePasswordForm extends SS_ChangePasswordForm
 {
     public function doChangePassword(array $data)
     {
