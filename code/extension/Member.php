@@ -26,8 +26,6 @@ class Member extends \DataExtension
 
     private static $admins_can_disable = false;
 
-    private static $regenerate_on_activation = true;
-
     private static $totp_window = 2;
 
     public function validateTOTP($token)
