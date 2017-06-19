@@ -88,6 +88,12 @@ class Member extends \DataExtension
      */
     public function updateCMSFields(\FieldList $fields)
     {
+        // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
+        if(!$this->owner->TOTPToken && !\Config::inst()->get(__CLASS__, 'regenerate_on_activation')) {
+            $this->generateTOTPToken();
+            $this->owner->write();
+        }
+        
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
         if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
@@ -119,7 +125,7 @@ class Member extends \DataExtension
 
     public function onBeforeWrite()
     {
-        if ($this->owner->isChanged('Has2FA', 2) && $this->owner->Has2FA) {
+        if ($this->owner->isChanged('Has2FA', 2) && $this->owner->Has2FA && \Config::inst()->get(__CLASS__, 'regenerate_on_activation')) {
             $this->generateTOTPToken();
         }
     }
