@@ -17,13 +17,8 @@
     },
 	"authors": [
 		{
-			"name": "Simon Welsh",
-			"email": "simon@simon.geek.nz",
-			"homepage": "http://coding.simon.geek.nz/"
-		},
-		{
 			"name": "Cam Findlay",
-			"email": "cam@silverstripe.com"
+			"email": "hello@camfindlay.com"
 		}
 
 	],
