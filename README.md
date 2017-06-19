@@ -20,7 +20,7 @@ See [Configuration](docs/en/configuration.md) documentation
 See [User guide](docs/en/userguide.md) documentation
 
 ## Maintainers
-- Cam Findlay <cam@silverstripe.com>
+- Cam Findlay <hello@camfindlay.com>
 
 ## Contributing
 See [Contributing documentation and license agreement](CONTRIBUTING.md)
