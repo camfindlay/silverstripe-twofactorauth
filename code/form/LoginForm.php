@@ -7,6 +7,16 @@ use Director;
 
 class LoginForm extends \MemberLoginForm
 {
+    private static $allowed_actions = array('cancel');
+
+    /**
+     * Action to unset the TOTP.ID session var to allow going back to the normal (email/pw) login form
+     */
+    public function cancel() {
+        Session::clear('TOTP.ID');
+        \Controller::curr()->redirectBack();
+    }
+
     public function doLogin($data)
     {
         if (Session::get('TOTP.ID')) {
@@ -86,6 +96,7 @@ class LoginForm extends \MemberLoginForm
 
         // Remove the lost-password action from the TOTP token form
         if ($fields->fieldByName('TOTP')) {
+            $actions->push(\FormAction::create("cancel", _t('LeftAndMain.CANCEL', "Cancel")));
             $actions->removeByName('forgotPassword');
         }
         return $actions;

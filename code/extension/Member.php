@@ -26,7 +26,14 @@ class Member extends \DataExtension
 
     private static $admins_can_disable = false;
 
+    private static $validated_activation_mode = false;
+
     private static $totp_window = 2;
+
+    public static function validated_activation_mode()
+    {
+        return \Config::inst()->get(__CLASS__, 'validated_activation_mode');
+    }
 
     public function validateTOTP($token)
     {
@@ -88,6 +95,12 @@ class Member extends \DataExtension
      */
     public function updateCMSFields(\FieldList $fields)
     {
+        // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
+        if(!$this->owner->TOTPToken && self::validated_activation_mode()) {
+            $this->generateTOTPToken();
+            $this->owner->write();
+        }
+
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
         if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
@@ -119,7 +132,8 @@ class Member extends \DataExtension
 
     public function onBeforeWrite()
     {
-        if ($this->owner->isChanged('Has2FA', 2) && $this->owner->Has2FA) {
+        // regenerate token if Has2FA activated and not in validated_activation_mode
+        if ($this->owner->isChanged('Has2FA', 2) && $this->owner->Has2FA && !self::validated_activation_mode()) {
             $this->generateTOTPToken();
         }
     }
@@ -155,3 +169,5 @@ class Member extends \DataExtension
         return sprintf('data:image/gif;base64,%s', $data);
     }
 }
+
+

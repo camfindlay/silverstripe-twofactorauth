@@ -1,0 +1,59 @@
+$token_color: #999;
+
+code.twofactor_tokens {
+  font-size: 140%;
+  color: $token_color;
+  display: block;
+  margin-bottom: 8px;
+
+  &.print_tokens {
+    display: inline-block;
+    border: 1px dotted $token_color;
+    border-radius: 6px;
+    padding: 3.4vw 8vw;
+  }
+}
+
+.cms .Actions > .twofactor_regeneratetokens {
+  float: right;
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+.twofactor_button {
+  position: relative;
+  .ui-icon {
+    position: absolute;
+    left: 12px;
+  }
+  .ui-button-text {
+    font-weight: normal;
+    padding-left: 36px;
+    small { font-size: 80%; }
+  }
+}
+
+.display-twofactorinfo-dialog .ui-dialog-content {
+  background: white;
+  margin: 20px;
+  border: 1px solid #ccc;
+  text-align: center;
+
+  #TokenInfoDialog{
+    ol {
+      list-style: decimal;
+      list-style-position: inside;
+    }
+    input {
+      width: 160px;
+    }
+  }
+
+  //.twofactor_checkmark {
+  //  color: green;
+  //  font-size: 240px;
+  //  line-height: 1;
+  //  margin-top: 50px;
+  //  display: block;
+  //}
+}

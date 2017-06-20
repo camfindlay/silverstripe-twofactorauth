@@ -1,0 +1,39 @@
+code.twofactor_tokens {
+  font-size: 140%;
+  color: #999;
+  display: block;
+  margin-bottom: 8px; }
+  code.twofactor_tokens.print_tokens {
+    display: inline-block;
+    border: 1px dotted #999;
+    border-radius: 6px;
+    padding: 3.4vw 8vw; }
+
+.cms .Actions > .twofactor_regeneratetokens {
+  float: right;
+  margin-right: 0;
+  margin-left: 8px; }
+
+.twofactor_button {
+  position: relative; }
+  .twofactor_button .ui-icon {
+    position: absolute;
+    left: 12px; }
+  .twofactor_button .ui-button-text {
+    font-weight: normal;
+    padding-left: 36px; }
+    .twofactor_button .ui-button-text small {
+      font-size: 80%; }
+
+.display-twofactorinfo-dialog .ui-dialog-content {
+  background: white;
+  margin: 20px;
+  border: 1px solid #ccc;
+  text-align: center; }
+  .display-twofactorinfo-dialog .ui-dialog-content #TokenInfoDialog ol {
+    list-style: decimal;
+    list-style-position: inside; }
+  .display-twofactorinfo-dialog .ui-dialog-content #TokenInfoDialog input {
+    width: 160px; }
+
+/*# sourceMappingURL=twofactorstyles.css.map */
