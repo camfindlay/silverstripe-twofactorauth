@@ -19,8 +19,13 @@
 		{
 			"name": "Cam Findlay",
 			"email": "hello@camfindlay.com"
-		}
-
+		},
+        {
+            "name": "Fred Condo",
+            "email": "fcondo@quinn.com",
+            "role": "Developer",
+            "homepage": "http://oddnoc.github.io"
+        }
 	],
 	"homepage": "https://github.com/camfindlay/silverstripe-twofactorauth",
 	"support": {
