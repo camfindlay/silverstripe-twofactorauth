@@ -15,39 +15,74 @@ class CMSProfileController extends \CMSProfileController
         if (!$member) {
             return $form;
         }
+
         $actions = $form->Actions();
         $fields = $form->Fields();
+
         $fields->removeByName('BackupTokens');
-        $two_factor_fields = [\CheckboxField::create('Has2FA', 'Enable Two Factor Authentication', $member->Has2FA)];
-        if ($member->Has2FA) {
-            $two_factor_fields[] = \LiteralField::create('SecurityWarning',
-                    '<p>The button below reveals your security token for scanning and any backup tokens you may have. '.
-                    'Please reveal them only when no one else is observing your screen.');
-            $two_factor_fields[] = \ToggleCompositeField::create('SecurityTokens', 'Security tokens', [
-            \LiteralField::create(
-                'PrintableTOTPToken',
-                sprintf('<div id="PrintableTOTPToken" class="field readonly">'.
-                        '<label class="left" for="Form_EditForm_PrintableTOTPToken">TOTP Token</label>'.
-                        '<div class="middleColumn">'.
-                        '<span id="Form_EditForm_PrintableTOTPToken" class="readonly">%s<br />'.
-                        '<img src="%s" width=175 height=175 /></span>'.
-                        '</div></div>', $member->getPrintableTOTPToken(), $member->generateQRCode())),
-            \LiteralField::create('DisplayBackupTokens', '<div id="DisplayBackupTokens" class="field readonly">'.
-                '<p><b>Backup Tokens:</b> Please copy these and keep in a safe place.</p>'.
-                implode('<br />', $member->BackupTokens()->column('Value')).'</div>'), ]
-            );
-        }
-        $fields->addFieldsToTab('Root.TwoFactorAuthentication', $two_factor_fields);
-        if ($member->Has2FA) {
-            $actions->push(
-                \FormAction::create('regenerate_backup_tokens')
-                    ->setTitle('Create new two-factor backup tokens')
-                    ->addExtraClass('ss-ui-action-constructive')
-                    ->addExtraClass('ss-ui-action-destructive')
-            );
-        }
+
+        $fields->addFieldsToTab('Root.TwoFactorAuthentication',
+            \CheckboxField::create('Has2FA', 'Enable Two Factor Authentication', $member->Has2FA)
+        );
+
+        $this->addTokenInfo($fields);
+
+        $this->addBackupTokenInfo($fields, $actions);
 
         return $form;
+    }
+
+    private function addTokenInfo(\FieldList &$fields)
+    {
+        $member = \Member::currentUser();
+        if (!$member) {
+            return;
+        }
+
+        if ($member->Has2FA) {
+            // add token QR code
+            $two_factor_fields[] = \LiteralField::create('TokenSecurityWarning',
+                _t("TWOFACTOR.TOKENSECURITYWARNING","<p><br>
+                    The button below reveals your security token for scanning.<br>
+                    <strong>Please reveal this only when no one else is observing your screen.</strong>
+                    </p>")
+            );
+            $two_factor_fields[] = \ToggleCompositeField::create('SecurityToken', 'Security token',
+                \LiteralField::create('PrintableTOTPToken', $member->renderWith('TokenInfo'))
+            );
+            $fields->addFieldsToTab('Root.TwoFactorAuthentication', $two_factor_fields);
+        }
+    }
+
+    private function addBackupTokenInfo(\FieldList &$fields, \FieldList &$actions)
+    {
+        $member = \Member::currentUser();
+        if (!$member) {
+            return;
+        }
+
+        if ($member->Has2FA) {
+            // backup-token info
+            $backup_token_fields[] = \LiteralField::create('BackupTokensSecurityWarning',
+                _t("TWOFACTOR.BACKUPTOKENSECURITYWARNING","<p><br>
+                    The button below reveals your backup tokens. These can each be used only once.<br>
+                    <strong>Please reveal them only when no one else is observing your screen.</strong>
+                    </p>")
+            );
+            $backup_token_fields[] = \ToggleCompositeField::create('BackupTokens', 'Backup tokens', [
+                \LiteralField::create('DisplayBackupTokens', $member->renderWith('BackupTokenInfo'))
+            ]);
+            $fields->addFieldsToTab('Root.TwoFactorAuthentication', $backup_token_fields);
+
+            // backup-tokens interaction
+            $actions->push(
+                \FormAction::create('regenerate_backup_tokens')
+                    ->setTitle('(Re)generate two-factor backup tokens')
+//                    ->addExtraClass('ss-ui-action-constructive')
+                    ->addExtraClass('ss-ui-action-destructive')
+                    ->addExtraClass('twofactor_regeneratetokens')
+            );
+        }
     }
 
     public function regenerate_backup_tokens($data, $form)
