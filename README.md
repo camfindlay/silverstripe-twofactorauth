@@ -21,6 +21,7 @@ See [User guide](docs/en/userguide.md) documentation
 
 ## Maintainers
 - Cam Findlay <hello@camfindlay.com>
+- Fred Condo <fcondo@quinn.com>
 
 ## Contributing
 See [Contributing documentation and license agreement](CONTRIBUTING.md)
