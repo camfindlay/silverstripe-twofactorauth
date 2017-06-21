@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAEA,qBAAsB;EACpB,SAAS,EAAE,IAAI;EACf,KAAK,EAJO,IAAI;EAKhB,OAAO,EAAE,KAAK;EACd,aAAa,EAAE,GAAG;EAElB,kCAAe;IACb,OAAO,EAAE,YAAY;IACrB,MAAM,EAAE,eAAuB;IAC/B,aAAa,EAAE,GAAG;IAClB,OAAO,EAAE,SAAS;;AAItB,2CAA4C;EAC1C,KAAK,EAAE,KAAK",
+"sources": ["twofactorstyles.scss"],
+"names": [],
+"file": "twofactorstyles.css"
+}

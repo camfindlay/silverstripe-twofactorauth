@@ -1,0 +1,19 @@
+$token_color: #999;
+
+code.twofactor_tokens {
+  font-size: 140%;
+  color: $token_color;
+  display: block;
+  margin-bottom: 8px;
+
+  &.print_tokens {
+    display: inline-block;
+    border: 1px dotted $token_color;
+    border-radius: 6px;
+    padding: 3.4vw 8vw;
+  }
+}
+
+.cms .Actions > .twofactor_regeneratetokens {
+  float: right;
+}

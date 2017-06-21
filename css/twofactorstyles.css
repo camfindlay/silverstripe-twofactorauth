@@ -1,0 +1,15 @@
+code.twofactor_tokens {
+  font-size: 140%;
+  color: #999;
+  display: block;
+  margin-bottom: 8px; }
+  code.twofactor_tokens.print_tokens {
+    display: inline-block;
+    border: 1px dotted #999;
+    border-radius: 6px;
+    padding: 3.4vw 8vw; }
+
+.cms .Actions > .twofactor_regeneratetokens {
+  float: right; }
+
+/*# sourceMappingURL=twofactorstyles.css.map */
