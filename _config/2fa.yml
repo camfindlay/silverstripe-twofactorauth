@@ -15,3 +15,9 @@ Injector:
     class: '_2fa\CMSProfileController'
 CMSSecurity:
   reauth_enabled: false
+
+LeftAndMain:
+  extra_requirements_css:
+    - twofactorauth/css/twofactorstyles.css
+  extra_requirements_javascript:
+    - twofactorauth/js/twofactorinteractions.js

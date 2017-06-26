@@ -96,6 +96,7 @@ class LoginForm extends \MemberLoginForm
 
         // Remove the lost-password action from the TOTP token form and insert a cancel button
         if ($fields->fieldByName('TOTP')) {
+            $actions->push(\FormAction::create("cancel", _t('LeftAndMain.CANCEL', "Cancel")));
             $actions->removeByName('forgotPassword');
             $actions->push(\FormAction::create("cancel", _t('LeftAndMain.CANCEL', "Cancel")));
         }
