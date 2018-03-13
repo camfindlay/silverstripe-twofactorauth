@@ -3,15 +3,15 @@
 namespace _2fa;
 
 
-
 use SilverStripe\Control\Session;
 use SilverStripe\Security\Member;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Control\Director;
+use SilverStripe\Control\Controller;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Security\MemberLoginForm;
+use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 
 
 class LoginForm extends MemberLoginForm
@@ -22,27 +22,29 @@ class LoginForm extends MemberLoginForm
      * Action to unset the TOTP.ID session var to allow going back to the normal (email/pw) login form
      */
     public function cancel() {
-        Session::clear('TOTP.ID');
-        \Controller::curr()->redirectBack();
+        $this->getRequest()->getSession()->clear('TOTP.ID');
+        Controller::curr()->redirectBack();
     }
 
     public function doLogin($data)
     {
-        if (Session::get('TOTP.ID')) {
+        $session = $this->getRequest()->getSession();
+        
+        if ($session->get('TOTP.ID')) {
             // Figure out what to do
             if (empty($data['TOTP'])) {
                 return $this->returnToForm();
             } else {
-                $member = Member::get()->byID(Session::get('TOTP.ID'));
+                $member = Member::get()->byID($session->get('TOTP.ID'));
                 if (!$member) {
-                    Session::clear('TOTP.ID');
+                    $session->clear('TOTP.ID');
 
                     return $this->returnToForm();
                 }
                 if ($member->validateTOTP($data['TOTP'])) {
-                    Session::clear('TOTP.ID');
-                    $member->LogIn(Session::get('TOTP.Remember'));
-                    $data = array('Remember' => Session::get('TOTP.Remember'));
+                    $session->clear('TOTP.ID');
+                    $member->LogIn($session->get('TOTP.Remember'));
+                    $data = array('Remember' => $session->get('TOTP.Remember'));
 
                     return $this->logInUserAndRedirect($data);
                 } else {
@@ -58,17 +60,17 @@ class LoginForm extends MemberLoginForm
             );
             if ($member) {
                 if ($member->Has2FA) {
-                    Session::set('TOTP.ID', $member->ID);
-                    Session::set('TOTP.Remember', !empty($data['Remember']));
+                    $session->set('TOTP.ID', $member->ID);
+                    $session->set('TOTP.Remember', !empty($data['Remember']));
                 } else {
                     $member->LogIn(!empty($data['Remember']));
 
                     return $this->logInUserAndRedirect($data);
                 }
             } else {
-                Session::set('SessionForms.MemberLoginForm.Email',
+                $session->set('SessionForms.MemberLoginForm.Email',
                     $data[Email::class]);
-                Session::set('SessionForms.MemberLoginForm.Remember',
+                $session->set('SessionForms.MemberLoginForm.Remember',
                     !empty($data['Remember']));
             }
             $this->returnToForm();
@@ -77,6 +79,8 @@ class LoginForm extends MemberLoginForm
 
     protected function returnToForm()
     {
+        $session = $this->getRequest()->getSession();
+        
         if (isset($_REQUEST['BackURL'])) {
             $backURL = $_REQUEST['BackURL'];
         } else {
@@ -84,7 +88,7 @@ class LoginForm extends MemberLoginForm
         }
 
         if ($backURL) {
-            Session::set('BackURL', $backURL);
+            $session->set('BackURL', $backURL);
         }
 
         // Show the right tab on failed login
@@ -115,13 +119,15 @@ class LoginForm extends MemberLoginForm
 
     public function Fields()
     {
-        if (!Session::get('TOTP.ID')) {
+        $session = $this->getRequest()->getSession();
+        
+        if (!$session->get('TOTP.ID')) {
             return parent::Fields();
         }
         $security_token = $this->getSecurityToken();
         $fields = FieldList::create(
             TextField::create('TOTP', 'Security Token'),
-            HiddenField::create('BackURL', null, Session::get('BackURL')),
+            HiddenField::create('BackURL', null, $session->get('BackURL')),
             HiddenField::create($security_token->getName(), null, $security_token->getSecurityID())
         );
         foreach ($this->getExtraFields() as $field) {

@@ -16,6 +16,8 @@ class BackupToken extends DataObject
         'Value' => 'Varchar',
     );
 
+    private static $table_name = '_2fa-BackupToken';
+
     private static $has_one = array(
         'Member' => Member::class,
     );

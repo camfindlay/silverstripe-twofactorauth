@@ -1,10 +1,20 @@
 ---
 Name: 2fa
+After:
+  - '#coresecurity'
 ---
 SilverStripe\Security\Member:
   extensions:
     - _2fa\Extensions\Member
 SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators:
+        default: '%$_2fa\CustomAuthenticator'
+  SilverStripe\Security\CMSSecurity:
+    properties:
+      Authenticators:
+        cms: '%$_2fa\CustomAuthenticator'
   SilverStripe\Security\MemberLoginForm:
     class: _2fa\LoginForm
   SilverStripe\Security\ChangePasswordForm:
