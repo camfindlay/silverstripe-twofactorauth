@@ -64,7 +64,7 @@ class CustomLoginHandler extends LoginHandler
             if (!$member) {
                 return $this->redirectBack();
             }
-            $this->performLogin($member, $data);
+            $this->performLogin($member, $data, $request);
             return $this->redirectAfterSuccessfulLogin();
         }
 
