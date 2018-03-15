@@ -22,12 +22,17 @@ class LoginForm extends MemberLoginForm
      * Action to unset the TOTP.ID session var to allow going back to the normal (email/pw) login form
      */
     public function cancel() {
+
+        throw new \Exception("_2fa\LoginForm is likely no longer needed. Check what's calling this.");
+        
         $this->getRequest()->getSession()->clear('TOTP.ID');
         Controller::curr()->redirectBack();
     }
 
     public function doLogin($data)
     {
+        throw new \Exception("_2fa\LoginForm is likely no longer needed. Check what's calling this.");
+
         $session = $this->getRequest()->getSession();
         
         if ($session->get('TOTP.ID')) {
@@ -104,6 +109,8 @@ class LoginForm extends MemberLoginForm
 
     public function Actions()
     {
+        throw new \Exception("_2fa\LoginForm is likely no longer needed. Check what's calling this.");
+        
         $actions = parent::Actions();
         $fields = $this->Fields();
 
@@ -119,6 +126,8 @@ class LoginForm extends MemberLoginForm
 
     public function Fields()
     {
+        throw new \Exception("_2fa\LoginForm is likely no longer needed. Check what's calling this.");
+        
         $session = $this->getRequest()->getSession();
         
         if (!$session->get('TOTP.ID')) {

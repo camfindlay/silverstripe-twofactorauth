@@ -56,25 +56,26 @@ class CustomLoginHandler extends LoginHandler
 
     public function completeSecondStep($data, Form $form, HTTPRequest $request)
     {
-        if ($this->checkSecondFactor($data)) {
-            $session = $request->getSession();
-            $memberID = $session->get('CustomLoginHandler.MemberID');
-            $member = Member::get()->byID($memberID);
+        $session = $request->getSession();
+        $memberID = $session->get('CustomLoginHandler.MemberID');
+        $member = Member::get()->byID($memberID);
+        if ($member->validateTOTP($data['SecondFactor'])) {
             $data = $session->get('CustomLoginHandler.Data');
             if (!$member) {
+                
                 return $this->redirectBack();
             }
             $this->performLogin($member, $data, $request);
+            
             return $this->redirectAfterSuccessfulLogin();
         }
-
 
         // Fail to login redirects back to form
         return $this->redirectBack();
     }
 
-    protected function checkSecondFactor($data)
-    {
-        return $data['SecondFactor'] === '12345';
-    }
+//    protected function checkSecondFactor($data)
+//    {
+//        return $data['SecondFactor'] === '12345';
+//    }
 }

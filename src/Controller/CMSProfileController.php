@@ -6,6 +6,7 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Forms\FormAction;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Admin\CMSProfileController as SS_CMSProfileController;
 
@@ -34,7 +35,7 @@ class CMSProfileController extends SS_CMSProfileController
         // cleanup
         $fields->removeByName('BackupTokens');
 
-        if(Member::validated_activation_mode()){
+        if(Config::inst()->get('Member', 'validated_activation_mode')){
             // remove direct activation option
             $fields->removeByName('Has2FA');
 
@@ -172,7 +173,7 @@ class CMSProfileController extends SS_CMSProfileController
         }
 
         // If we're in validated activation mode, this is the appropriate moment to refresh the token
-        if(Member::validated_activation_mode() && !$member->Has2FA){
+        if(Config::inst()->get('Member', 'validated_activation_mode') && !$member->Has2FA){
             // set new secret/token on member
             $member->generateTOTPToken();
             $member->write();
