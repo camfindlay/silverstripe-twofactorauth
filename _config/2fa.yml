@@ -4,17 +4,20 @@ After:
   - '#coresecurity'
 ---
 SilverStripe\Security\Member:
+  validated_activation_mode: true
+  admins_can_disable: false
+  totp_window: 2
   extensions:
     - _2fa\Extensions\Member
 SilverStripe\Core\Injector\Injector:
   SilverStripe\Security\Security:
     properties:
       Authenticators:
-        default: '%$_2fa\CustomAuthenticator'
+        default: '%$_2fa\Authenticator'
   SilverStripe\Security\CMSSecurity:
     properties:
       Authenticators:
-        cms: '%$_2fa\CustomAuthenticator'
+        cms: '%$_2fa\Authenticator'
   SilverStripe\Security\MemberLoginForm:
     class: _2fa\LoginForm
   SilverStripe\Security\ChangePasswordForm:

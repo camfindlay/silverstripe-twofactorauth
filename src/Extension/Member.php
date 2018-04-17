@@ -30,15 +30,9 @@ class Member extends DataExtension
         'BackupTokens' => '_2fa\BackupToken',
     );
 
-    private static $admins_can_disable = false;
-
-    private static $validated_activation_mode = false;
-
-    private static $totp_window = 2;
-
     public static function validated_activation_mode()
     {
-        return \Config::inst()->get(__CLASS__, 'validated_activation_mode');
+        return Config::inst()->get(__CLASS__, 'validated_activation_mode');
     }
 
     public function validateTOTP($token)
@@ -46,11 +40,11 @@ class Member extends DataExtension
         assert(is_string($token));
 
         if (!$this->owner->Has2FA) {
-            return true;
+            return false;
         }
         $seed = $this->OTPSeed();
         if (!$seed) {
-            return true;
+            return false;
         }
         $window = (int) Config::inst()->get(__CLASS__, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
@@ -136,14 +130,6 @@ class Member extends DataExtension
         parent::onBeforeDelete();
     }
 
-    public function onBeforeWrite()
-    {
-        // regenerate token if Has2FA activated and not in validated_activation_mode
-        if ($this->owner->isChanged('Has2FA', 2) && $this->owner->Has2FA && !self::validated_activation_mode()) {
-            $this->generateTOTPToken();
-        }
-    }
-
     public function getOTPUrl()
     {
         if (class_exists(SiteConfig::class)) {
@@ -168,11 +154,9 @@ class Member extends DataExtension
         $qrCode = new QrCode();
         $qrCode->setText($this->getOTPUrl());
         $qrCode->setSize(175);
-        $qrCode->setPadding(10);
-        $data = $qrCode->get(QrCode::IMAGE_TYPE_GIF);
-        $data = base64_encode($data);
+        $qrCode->setMargin(0);
 
-        return sprintf('data:image/gif;base64,%s', $data);
+        return $qrCode->writeDataUri();
     }
 }
 

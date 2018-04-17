@@ -4,13 +4,13 @@ namespace _2fa;
 
 use SilverStripe\Security\MemberAuthenticator\MemberAuthenticator;
 
-class CustomAuthenticator extends MemberAuthenticator
+class Authenticator extends MemberAuthenticator
 {
     /**
      * @inherit
      */
     public function getLoginHandler($link)
     {
-        return CustomLoginHandler::create($link, $this);
+        return LoginHandler::create($link, $this);
     }
 }
