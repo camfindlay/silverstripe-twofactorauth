@@ -2,6 +2,7 @@
 
 namespace _2fa\Extensions;
 
+use _2fa\BackupToken;
 use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
 use Endroid\QrCode\QrCode;
@@ -39,9 +40,6 @@ class Member extends DataExtension
     {
         assert(is_string($token));
 
-        if (!$this->owner->Has2FA) {
-            return false;
-        }
         $seed = $this->OTPSeed();
         if (!$seed) {
             return false;
@@ -157,6 +155,19 @@ class Member extends DataExtension
         $qrCode->setMargin(0);
 
         return $qrCode->writeDataUri();
+    }
+    
+    public function regenerateBackupTokens()
+    {
+        $member = $this->owner;
+        $backup_token_list = $member->BackupTokens();
+        foreach ($backup_token_list as $bt) {
+            $bt->delete();
+        }
+        foreach (range(1, Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
+            $token = BackupToken::create();
+            $backup_token_list->add($token);
+        }
     }
 }
 

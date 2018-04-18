@@ -2,6 +2,7 @@
 
 namespace _2fa;
 
+use SilverStripe\Security\Security;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler as SS_LoginHandler;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 use SilverStripe\Control\HTTPRequest;
@@ -16,10 +17,12 @@ class LoginHandler extends SS_LoginHandler
 
     private static $allowed_actions = [
         'step2',
+        'secondStepForm',
         'twofactorsetup',
         'twoFactorSetupFrom',
-        'secondStepForm',
         'verify_and_activate',
+        'twofactorcomplete',
+        'show_backup_tokens',
     ];
 
     public function doLogin($data, MemberLoginForm $form, HTTPRequest $request)
@@ -51,6 +54,11 @@ class LoginHandler extends SS_LoginHandler
         return [
             "Form" => $this->twoFactorSetupFrom()
         ];
+    }
+
+    public function twofactorcomplete()
+    {
+        return $this->redirectAfterSuccessfulLogin();
     }
     
     public function twoFactorSetupFrom()
@@ -84,9 +92,7 @@ class LoginHandler extends SS_LoginHandler
             return;
         }
 
-        $member->Has2FA = true; // needed voor validation process
         $TokenCorrect   = $member->validateTOTP((string) $request->postVar('VerificationInput'));
-        $member->Has2FA = false; // reset just to be sure
 
         if ($TokenCorrect) {
             $member->Has2FA = true;
@@ -99,7 +105,7 @@ class LoginHandler extends SS_LoginHandler
             }
             $this->performLogin($member, $data, $request);
 
-            return $this->redirectAfterSuccessfulLogin();
+            return $this->redirect($this->link('show_backup_tokens'));
         }
 
         // else: show feedback
@@ -112,13 +118,30 @@ class LoginHandler extends SS_LoginHandler
         ];
     }
 
+    public function show_backup_tokens()
+    {
+        $member = Security::getCurrentUser();
+        
+        if(!$member->BackupTokens()->count()) {
+            $member->regenerateBackupTokens();
+        }
+        
+        return [
+            "Title" => 'Two Factor Back Up Tokens',
+            "Content" => $member->customise(array(
+                "backUrl" => $this->getBackURL()
+            ))
+            ->renderWith('ShowBackUpTokens')
+        ];
+    }
+    
     public function secondStepForm()
     {
         return new Form(
             $this,
             "secondStepForm",
             new FieldList(
-                new TextField('SecondFactor', 'Your 2FA (12345)')
+                new TextField('SecondFactor', 'Access Token')
             ),
             new FieldList(
                 new FormAction('completeSecondStep', 'Log in')
@@ -146,8 +169,4 @@ class LoginHandler extends SS_LoginHandler
         return $this->redirectBack();
     }
 
-//    protected function checkSecondFactor($data)
-//    {
-//        return $data['SecondFactor'] === '12345';
-//    }
 }

@@ -263,14 +263,7 @@ class CMSProfileController extends SS_CMSProfileController
     public function regenerate_backup_tokens($data, $form)
     {
         $member = Member::currentUser();
-        $backup_token_list = $member->BackupTokens();
-        foreach ($backup_token_list as $bt) {
-            $bt->delete();
-        }
-        foreach (range(1, Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
-            $token = BackupToken::create();
-            $backup_token_list->add($token);
-        }
+        $member->regenerateBackupTokens();
         $this->response
                 ->addHeader('X-Status', 'Your old backup tokens are gone. Please record these new ones!')
                 ->addHeader('X-Pjax', 'CurrentForm')
