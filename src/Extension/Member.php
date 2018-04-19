@@ -152,9 +152,8 @@ class Member extends DataExtension
         $qrCode = new QrCode();
         $qrCode->setText($this->getOTPUrl());
         $qrCode->setSize(175);
-        $qrCode->setMargin(0);
 
-        return $qrCode->writeDataUri();
+        return $qrCode->getDataUri();
     }
     
     public function regenerateBackupTokens()
