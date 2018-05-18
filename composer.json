@@ -56,6 +56,10 @@
   },
   "extra": {
     "installer-name": "twofactorauth",
+    "expose": [
+      "css",
+      "js"
+		],
     "screenshots": [
       "docs/en/_images/2fa-token-qr.png",
       "docs/en/_images/2fa-login.png",
