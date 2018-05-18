@@ -2,10 +2,8 @@
 
 namespace _2fa;
 
-
 use SilverStripe\Security\Member;
 use SilverStripe\Security\MemberAuthenticator\ChangePasswordForm as SS_ChangePasswordForm;
-
 
 class ChangePasswordForm extends SS_ChangePasswordForm
 {

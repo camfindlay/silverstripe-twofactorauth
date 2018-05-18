@@ -3,10 +3,13 @@ Name: 2fa
 After:
   - '#coresecurity'
 ---
-SilverStripe\Security\Member:
+_2fa\Authenticator:
+  enforce_2fa: true
+  require_2fa: true
   validated_activation_mode: true
   admins_can_disable: false
   totp_window: 2
+SilverStripe\Security\Member:
   extensions:
     - _2fa\Extensions\Member
 SilverStripe\Core\Injector\Injector:
@@ -22,8 +25,6 @@ SilverStripe\Core\Injector\Injector:
     class: _2fa\LoginForm
   SilverStripe\Security\ChangePasswordForm:
     class: _2fa\ChangePasswordForm
-  SilverStripe\Security\CMSMemberLoginForm:
-    class: _2fa\NonExistent
   SilverStripe\Admin\CMSProfileController:
     class: _2fa\CMSProfileController
 SilverStripe\Security\CMSSecurity:

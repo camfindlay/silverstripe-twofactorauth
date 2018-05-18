@@ -2,15 +2,16 @@
 
 namespace _2fa;
 
-use SilverStripe\Security\Security;
-use SilverStripe\Security\MemberAuthenticator\LoginHandler as SS_LoginHandler;
-use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
-use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Security\Member;
 use SilverStripe\Forms\Form;
-use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Security\Member;
+use SilverStripe\Control\Director;
+use SilverStripe\Forms\FormAction;
+use SilverStripe\Security\Security;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
+use SilverStripe\Security\MemberAuthenticator\LoginHandler as SS_LoginHandler;
 
 class LoginHandler extends SS_LoginHandler
 {
@@ -29,8 +30,8 @@ class LoginHandler extends SS_LoginHandler
     {
         if ($member = $this->checkLogin($data, $request, $result)) {
             $session = $request->getSession();
-            $session->set('CustomLoginHandler.MemberID', $member->ID);
-            $session->set('CustomLoginHandler.Data', $data);
+            $session->set('TwoFactorLoginHandler.MemberID', $member->ID);
+            $session->set('TwoFactorLoginHandler.Data', $data);
             if($member->Has2FA) {
                 return $this->redirect($this->link('step2'));
             } else {
@@ -64,7 +65,7 @@ class LoginHandler extends SS_LoginHandler
     public function twoFactorSetupFrom()
     {
         $session  = $this->request->getSession();
-        $memberID = $session->get('CustomLoginHandler.MemberID');
+        $memberID = $session->get('TwoFactorLoginHandler.MemberID');
         $member   = Member::get()->byID($memberID);
         $member->generateTOTPToken();
         $member->write();
@@ -79,26 +80,27 @@ class LoginHandler extends SS_LoginHandler
     /**
      * Function to allow verification & activation of two-factor-auth via Ajax
      *
-     * @param $data
-     * @param $form
+     * @param $request
      * @return \SS_HTTPResponse
      */
     public function verify_and_activate($request)
     {
         $session  = $this->request->getSession();
-        $memberID = $session->get('CustomLoginHandler.MemberID');
+        $memberID = $session->get('TwoFactorLoginHandler.MemberID');
         $member   = Member::get()->byID($memberID);
         if (!$member) {
             return;
         }
 
-        $TokenCorrect   = $member->validateTOTP((string) $request->postVar('VerificationInput'));
+        $TokenCorrect = $member->validateTOTP(
+            (string) $request->postVar('VerificationInput')
+        );
 
         if ($TokenCorrect) {
             $member->Has2FA = true;
             $member->write();
 
-            $data = $session->get('CustomLoginHandler.Data');
+            $data = $session->get('TwoFactorLoginHandler.Data');
             if (!$member) {
 
                 return $this->redirectBack();
@@ -110,10 +112,13 @@ class LoginHandler extends SS_LoginHandler
 
         // else: show feedback
         return [
-            "Form" => $member->customise(array(
-                    'CurrentController' => $this,
-                    'VerificationError' => true,
-                ))
+            "Form" => $member
+                ->customise(
+                    [
+                        'CurrentController' => $this,
+                        'VerificationError' => true,
+                    ]
+                )
                 ->renderWith('TokenInfoDialog')
         ];
     }
@@ -152,10 +157,10 @@ class LoginHandler extends SS_LoginHandler
     public function completeSecondStep($data, Form $form, HTTPRequest $request)
     {
         $session = $request->getSession();
-        $memberID = $session->get('CustomLoginHandler.MemberID');
+        $memberID = $session->get('TwoFactorLoginHandler.MemberID');
         $member = Member::get()->byID($memberID);
         if ($member->validateTOTP($data['SecondFactor'])) {
-            $data = $session->get('CustomLoginHandler.Data');
+            $data = $session->get('TwoFactorLoginHandler.Data');
             if (!$member) {
                 
                 return $this->redirectBack();
@@ -167,6 +172,20 @@ class LoginHandler extends SS_LoginHandler
 
         // Fail to login redirects back to form
         return $this->redirectBack();
+    }
+    
+    public function getBackURL()
+    {
+        $session  = $this->request->getSession();
+        $backURL = null;
+        $data = $session->get('TwoFactorLoginHandler.Data');
+        if($data && isset($session->get('TwoFactorLoginHandler.Data')['BackURL'])) {
+            $backURL = $session->get('TwoFactorLoginHandler.Data')['BackURL'];
+        }
+        if ($backURL && Director::is_site_url($backURL)) {
+            return $backURL;
+        }
+        return parent::getBackURL();
     }
 
 }

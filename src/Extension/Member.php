@@ -2,15 +2,16 @@
 
 namespace _2fa\Extensions;
 
-use _2fa\BackupToken;
-use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
+use Rych\OTP\TOTP;
+use _2fa\BackupToken;
+use _2fa\Authenticator;
 use Endroid\QrCode\QrCode;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\ORM\DataExtension;
 
 
 /**
@@ -31,11 +32,6 @@ class Member extends DataExtension
         'BackupTokens' => '_2fa\BackupToken',
     );
 
-    public static function validated_activation_mode()
-    {
-        return Config::inst()->get(__CLASS__, 'validated_activation_mode');
-    }
-
     public function validateTOTP($token)
     {
         assert(is_string($token));
@@ -44,7 +40,7 @@ class Member extends DataExtension
         if (!$seed) {
             return false;
         }
-        $window = (int) Config::inst()->get(__CLASS__, 'totp_window');
+        $window = (int) Config::inst()->get(Authenticator::class, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
 
         $valid = $totp->validate($token);
@@ -56,12 +52,7 @@ class Member extends DataExtension
                 $candidate_backup_token = $backup_tokens->first();
                 if ($token === $candidate_backup_token->Value) {
                     $valid = true;
-
-                    // Backup tokens should be unique;
-                    // ensure any duplicates are deleted when successfully used
-                    foreach ($backup_tokens as $bt) {
-                        $bt->delete();
-                    }
+                    $candidate_backup_token->delete();
                 }
             }
         }
@@ -69,14 +60,14 @@ class Member extends DataExtension
         return $valid;
     }
 
-    public function getPrintableTOTPToken()
+    private function getPrintableTOTPToken()
     {
         $seed = $this->OTPSeed();
 
         return $seed ? $seed->getValue(Seed::FORMAT_BASE32) : '';
     }
 
-    public function OTPSeed()
+    private function OTPSeed()
     {
         if ($this->owner->TOTPToken) {
             return new Seed($this->owner->TOTPToken);
@@ -86,22 +77,28 @@ class Member extends DataExtension
     }
 
     /**
-     * Allow other admins to turn off 2FA if it is set & admins_can_disable is set in the config.
+     * Allow other admins to turn off 2FA if it is set & admins_can_disable is
+     * set in the config.
      * 2FA in general is managed in the user's own profile.
      *
      * @param \FieldList $fields
      */
     public function updateCMSFields(FieldList $fields)
     {
-        // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
-        if(!$this->owner->TOTPToken && self::validated_activation_mode()) {
+        // Generate default token (allows scanning the QR at the moment of
+        // activation and (optionally) validate before activating 2FA)
+        if (!$this->owner->TOTPToken
+            && Config::inst()->get(Authenticator::class, 'validated_activation_mode')
+        ) {
             $this->generateTOTPToken();
             $this->owner->write();
         }
 
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
-        if (!(Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && Permission::check('ADMIN'))) {
+        if (!(Config::inst()->get(Authenticator::class, 'admins_can_disable')
+            && $this->owner->Has2FA && Permission::check('ADMIN'))
+        ) {
             $fields->removeByName('Has2FA');
         }
     }
@@ -128,7 +125,7 @@ class Member extends DataExtension
         parent::onBeforeDelete();
     }
 
-    public function getOTPUrl()
+    private function getOTPUrl()
     {
         if (class_exists(SiteConfig::class)) {
             $config = SiteConfig::current_site_config();
@@ -163,7 +160,7 @@ class Member extends DataExtension
         foreach ($backup_token_list as $bt) {
             $bt->delete();
         }
-        foreach (range(1, Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
+        foreach (range(1,Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
             $token = BackupToken::create();
             $backup_token_list->add($token);
         }

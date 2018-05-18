@@ -10,7 +10,10 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Admin\CMSProfileController as SS_CMSProfileController;
 
-
+/**
+ * Adds in handling of token creation and validation in the CMS 'My Profile' 
+ * section
+ */
 class CMSProfileController extends SS_CMSProfileController
 {
     private static $allowed_actions = [
@@ -21,6 +24,14 @@ class CMSProfileController extends SS_CMSProfileController
         'verify_and_deactivate',
     ];
 
+    /**
+     * Adds in Two Factor Authentication tab. Tab state changes depending on
+     * whether the member has TwoFactor enabled or not
+     *
+     * @param int $id
+     * @param FieldList $fields
+     * @return Form
+     */
     public function getEditForm($id = null, $fields = null)
     {
         $form = parent::getEditForm($id, $fields);
@@ -35,46 +46,46 @@ class CMSProfileController extends SS_CMSProfileController
         // cleanup
         $fields->removeByName('BackupTokens');
 
-        if(Config::inst()->get('Member', 'validated_activation_mode')){
-            // remove direct activation option
-            $fields->removeByName('Has2FA');
+        // remove direct activation option
+        $fields->removeByName('Has2FA');
 
-            // activate/deactivate through button+popup instead
-            $alterbutton = FormAction::create('open_deactivation_dialog')
-                ->addExtraClass('twofactor_button twofactor_dialogbutton')
-                ->setAttribute('data-infourl', $this->Link('load_token_data'))
-                ->setUseButtonTag(true);
+        // activate/deactivate through button+popup instead
+        $alterbutton = FormAction::create('open_deactivation_dialog')
+            ->addExtraClass('twofactor_button twofactor_dialogbutton')
+            ->setAttribute('data-infourl', $this->Link('load_token_data'))
+            ->setUseButtonTag(true);
 
-            if ($member->Has2FA) {
-                $alterbutton
-                    ->setButtonContent(
-                        _t("TWOFACTOR.ACTIVATE2FA",'Two-Factor Authentication is: <strong>ACTIVE</strong><br><small>click to deativate</small>'))
-                    ->setAttribute('data-icon', 'accept');
-            } else {
-                $alterbutton
-                    ->setButtonContent(
-                        _t("TWOFACTOR.ACTIVATE2FA",'Two-Factor Authentication is: <strong>NOT ACTIVE</strong><br><small>click to ativate</small>'))
-                    ->setAttribute('data-icon', 'accept_disabled');
-            }
-            $fields->addFieldToTab('Root.TwoFactorAuthentication', $alterbutton);
-
-            // token regeneration
-            $actions->push(
-                FormAction::create('regenerate_token')
-                    ->setTitle('Reset two-factor KEY')
-//                    ->addExtraClass('ss-ui-action-constructive')
-                    ->addExtraClass('ss-ui-action-destructive')
-                    ->addExtraClass('twofactor_regeneratetokens')
-            );
-
+        if ($member->Has2FA) {
+            $alterbutton
+                ->setButtonContent(
+                    _t(
+                        "TWOFACTOR.ACTIVATE2FA",
+                        'Two-Factor Authentication is: <strong>ACTIVE</strong>
+                        <br><small>click to deativate</small>'
+                    )
+                )
+                ->setAttribute('data-icon', 'accept');
         } else {
-            // tokens will be regenerated upon each (re)activation of 2FA, in this modus the QR is shown AFTER reactivation
-            $fields->addFieldToTab('Root.TwoFactorAuthentication',
-                CheckboxField::create('Has2FA', 'Enable Two Factor Authentication', $member->Has2FA)
-            );
-
-            $this->addTokenInfo($fields);
+            $alterbutton
+                ->setButtonContent(
+                    _t(
+                        "TWOFACTOR.ACTIVATE2FA",
+                        'Two-Factor Authentication is:
+                        <strong>NOT ACTIVE</strong>
+                        <br><small>click to ativate</small>'
+                    )
+                )
+                ->setAttribute('data-icon', 'accept_disabled');
         }
+        $fields->addFieldToTab('Root.TwoFactorAuthentication', $alterbutton);
+
+        // token regeneration
+        $actions->push(
+            FormAction::create('regenerate_token')
+                ->setTitle('Reset two-factor KEY')
+                ->addExtraClass('ss-ui-action-destructive')
+                ->addExtraClass('twofactor_regeneratetokens')
+        );
 
         // Backup tokens may always be shown
         $this->addBackupTokenInfo($fields, $actions);
@@ -82,6 +93,12 @@ class CMSProfileController extends SS_CMSProfileController
         return $form;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param FieldList $fields
+     * @return void
+     */
     private function addTokenInfo(FieldList &$fields)
     {
         $member = Member::currentUser();
@@ -92,15 +109,26 @@ class CMSProfileController extends SS_CMSProfileController
         if ($member->Has2FA) {
             // add token QR code
             $two_factor_fields[] = LiteralField::create('TokenSecurityWarning',
-                _t("TWOFACTOR.TOKENSECURITYWARNING","<p><br>
-                    The button below reveals your security token for scanning.<br>
-                    <strong>Please reveal this only when no one else is observing your screen.</strong>
-                    </p>")
+                _t(
+                    "TWOFACTOR.TOKENSECURITYWARNING",
+                    "<p><br>The button below reveals your security token for
+                    scanning.<br>
+                    <strong>Please reveal this only when no one else is
+                    observing your screen.</strong></p>"
+                )
             );
-            $two_factor_fields[] = ToggleCompositeField::create('SecurityToken', 'Security token',
-                LiteralField::create('PrintableTOTPToken', $member->renderWith('TokenInfo'))
+            $two_factor_fields[] = ToggleCompositeField::create(
+                'SecurityToken',
+                'Security token',
+                LiteralField::create(
+                    'PrintableTOTPToken',
+                    $member->renderWith('TokenInfo')
+                )
             );
-            $fields->addFieldsToTab('Root.TwoFactorAuthentication', $two_factor_fields);
+            $fields->addFieldsToTab(
+                'Root.TwoFactorAuthentication',
+                $two_factor_fields
+            );
         }
     }
 
@@ -113,22 +141,34 @@ class CMSProfileController extends SS_CMSProfileController
 
         if ($member->Has2FA) {
             // backup-token info
-            $backup_token_fields[] = LiteralField::create('BackupTokensSecurityWarning',
-                _t("TWOFACTOR.BACKUPTOKENSECURITYWARNING","<p><br>
-                    The button below reveals your backup tokens. These can each be used only once.<br>
-                    <strong>Please reveal them only when no one else is observing your screen.</strong>
-                    </p>")
+            $backup_token_fields[] = LiteralField::create(
+                'BackupTokensSecurityWarning',
+                _t("TWOFACTOR.BACKUPTOKENSECURITYWARNING",
+                    "<p><br>The button below reveals your backup tokens. These
+                    can each be used only once.<br>
+                    <strong>Please reveal them only when no one else is
+                    observing your screen.</strong></p>"
+                )
             );
-            $backup_token_fields[] = ToggleCompositeField::create('BackupTokens', 'Backup tokens', [
-                LiteralField::create('DisplayBackupTokens', $member->renderWith('BackupTokenInfo'))
-            ]);
-            $fields->addFieldsToTab('Root.TwoFactorAuthentication', $backup_token_fields);
+            $backup_token_fields[] = ToggleCompositeField::create(
+                'BackupTokens',
+                'Backup tokens',
+                [
+                    LiteralField::create(
+                        'DisplayBackupTokens',
+                        $member->renderWith('BackupTokenInfo')
+                    )
+                ]
+            );
+            $fields->addFieldsToTab(
+                'Root.TwoFactorAuthentication',
+                $backup_token_fields
+            );
 
             // backup-tokens interaction
             $actions->push(
                 FormAction::create('regenerate_backup_tokens')
                     ->setTitle('(Re)generate BACKUP tokens')
-//                    ->addExtraClass('ss-ui-action-constructive')
                     ->addExtraClass('ss-ui-action-destructive')
                     ->addExtraClass('twofactor_regeneratetokens')
             );
@@ -136,10 +176,11 @@ class CMSProfileController extends SS_CMSProfileController
     }
 
     /**
-     * This form action may get triggered to manually refresh secret/token when running in 'fixed' token mode (regenerate_on_activation = false)
+     * This form action may get triggered to manually refresh secret/token when
+     * running in 'fixed' token mode (regenerate_on_activation = false)
      *
-     * @param $data
-     * @param $form
+     * @param $data Array
+     * @param $form Form
      * @return SS_HTTPResponse
      */
     public function regenerate_token($data, $form)
@@ -147,12 +188,16 @@ class CMSProfileController extends SS_CMSProfileController
         $member = Member::currentUser();
         // set new secret/token on member
         $member->generateTOTPToken();
-        // if we're manually regenerating, user needs to re-activate & verify 2FA after token change
+        // if we're manually regenerating, user needs to re-activate & verify
+        // 2FA after token change
         $member->Has2FA = false;
         $member->write();
 
         $this->response
-            ->addHeader('X-Status', 'Token/secret regenerated, please re-activate two-factor authentication')
+            ->addHeader(
+                'X-Status',
+                'Token/secret regenerated, please re-activate two-factor authentication'
+            )
             ->addHeader('X-Reload', true);
 
         return $this->getResponseNegotiator()->respond($this->request);
@@ -172,25 +217,22 @@ class CMSProfileController extends SS_CMSProfileController
             return;
         }
 
-        // If we're in validated activation mode, this is the appropriate moment to refresh the token
-        if(Config::inst()->get('Member', 'validated_activation_mode') && !$member->Has2FA){
+        // If we're in validated activation mode, this is the appropriate moment
+        // to refresh the token
+        if(!$member->Has2FA) {
             // set new secret/token on member
             $member->generateTOTPToken();
             $member->write();
         }
 
-        return $member
-            ->customise(array(
-                'CurrentController' => $this,
-            ))
+        return $member->customise(['CurrentController' => $this])
             ->renderWith('TokenInfoDialog');
     }
 
     /**
      * Function to allow verification & activation of two-factor-auth via Ajax
      *
-     * @param $data
-     * @param $form
+     * @param $request
      * @return \SS_HTTPResponse
      */
     public function verify_and_activate($request)
@@ -200,9 +242,9 @@ class CMSProfileController extends SS_CMSProfileController
             return;
         }
 
-        $member->Has2FA = true; // needed voor validation process
-        $TokenCorrect = $member->validateTOTP( (string) $request->postVar('VerificationInput') );
-        $member->Has2FA = false; // reset just to be sure
+        $TokenCorrect = $member->validateTOTP(
+            (string) $request->postVar('VerificationInput')
+        );
 
         if($TokenCorrect){
             $member->Has2FA = true;
@@ -217,18 +259,19 @@ class CMSProfileController extends SS_CMSProfileController
 
         // else: show feedback
         return $member
-            ->customise(array(
-                'CurrentController' => $this,
-                'VerificationError' => true,
-            ))
+            ->customise(
+                [
+                    'CurrentController' => $this,
+                    'VerificationError' => true,
+                ]
+            )
             ->renderWith('TokenInfoDialog');
     }
 
     /**
      * Function to allow verification of password & dectivation of two-factor-auth via Ajax
      *
-     * @param $data
-     * @param $form
+     * @param $request
      * @return \SS_HTTPResponse
      */
     public function verify_and_deactivate($request)
@@ -238,8 +281,10 @@ class CMSProfileController extends SS_CMSProfileController
             return;
         }
 
-        $PasswordCorrect = $member->checkPassword((string) $request->postVar('VerificationInput'));
-        if($PasswordCorrect->valid()){
+        $PasswordCorrect = $member->checkPassword(
+            (string) $request->postVar('VerificationInput')
+        );
+        if($PasswordCorrect->valid()) {
 
             $member->Has2FA = false;
             $member->write();
@@ -253,10 +298,12 @@ class CMSProfileController extends SS_CMSProfileController
 
         // else: show feedback
         return $member
-            ->customise(array(
-                'CurrentController' => $this,
-                'VerificationError' => true,
-            ))
+            ->customise(
+                [
+                    'CurrentController' => $this,
+                    'VerificationError' => true,
+                ]
+            )
             ->renderWith('TokenInfoDialog');
     }
 
