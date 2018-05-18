@@ -1,6 +1,6 @@
 {
   "name": "camfindlay/silverstripe-twofactorauth",
-  "type": "silverstripe-module",
+  "type": "silverstripe-vendormodule",
   "description": "Adds 2 factor authentication to SilverStripe CMS",
   "license": "BSD-3-Clause",
   "keywords": [
@@ -13,7 +13,7 @@
   "require": {
     "rych/otp": "1.1.*",
     "endroid/qr-code": "1.3.*",
-    "silverstripe/framework": "^3.3.2 || ^3.2.4 || ^3.1.19 || ^4.0.0"
+    "silverstripe/framework": "^4.0.0"
   },
   "conflict": {
     "91carriage/2fa": "*"
@@ -31,11 +31,16 @@
       "name": "Cam Findlay",
       "email": "cam@silverstripe.com"
     },
-	{
+    {
         "name": "Fred Condo",
         "email": "fcondo@quinn.com",
         "role": "Developer",
         "homepage": "http://oddnoc.github.io"
+    },
+    {
+        "name": "Stephen McMahon",
+        "email": "stephen@symbiote.com.au",
+        "role": "Developer"
     }
   ],
   "homepage": "https://github.com/camfindlay/silverstripe-twofactorauth",
