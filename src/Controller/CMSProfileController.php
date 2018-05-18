@@ -61,7 +61,7 @@ class CMSProfileController extends SS_CMSProfileController
                     _t(
                         "TWOFACTOR.ACTIVATE2FA",
                         'Two-Factor Authentication is: <strong>ACTIVE</strong>
-                        <br><small>click to deativate</small>'
+                        <br><small>click to deactivate</small>'
                     )
                 )
                 ->setAttribute('data-icon', 'accept');
@@ -72,7 +72,7 @@ class CMSProfileController extends SS_CMSProfileController
                         "TWOFACTOR.ACTIVATE2FA",
                         'Two-Factor Authentication is:
                         <strong>NOT ACTIVE</strong>
-                        <br><small>click to ativate</small>'
+                        <br><small>click to activate</small>'
                     )
                 )
                 ->setAttribute('data-icon', 'accept_disabled');
