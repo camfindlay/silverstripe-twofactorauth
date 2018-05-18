@@ -284,7 +284,7 @@ class CMSProfileController extends SS_CMSProfileController
         $PasswordCorrect = $member->checkPassword(
             (string) $request->postVar('VerificationInput')
         );
-        if($PasswordCorrect->valid()) {
+        if ($PasswordCorrect->isValid()) {
 
             $member->Has2FA = false;
             $member->write();
