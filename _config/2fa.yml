@@ -30,8 +30,8 @@ SilverStripe\Core\Injector\Injector:
 SilverStripe\Security\CMSSecurity:
   reauth_enabled: false
 
-LeftAndMain:
+SilverStripe\Admin\LeftAndMain:
   extra_requirements_css:
-    - twofactorauth/css/twofactorstyles.css
+    - 'camfindlay/silverstripe-twofactorauth: css/twofactorstyles.css'
   extra_requirements_javascript:
-    - twofactorauth/js/twofactorinteractions.js
+    - 'camfindlay/silverstripe-twofactorauth: js/twofactorinteractions.js'

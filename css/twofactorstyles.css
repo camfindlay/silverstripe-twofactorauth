@@ -6,8 +6,8 @@ code.twofactor_tokens {
   code.twofactor_tokens.print_tokens {
     display: inline-block;
     border: 1px dotted #999;
-    border-radius: 6px;
-    padding: 3.4vw 8vw; }
+    border-radius: 2px;
+    padding: 2rem; }
 
 .cms .Actions > .twofactor_regeneratetokens {
   float: right;
