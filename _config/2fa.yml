@@ -4,8 +4,8 @@ After:
   - '#coresecurity'
 ---
 _2fa\Authenticator:
-  enforce_2fa: true
-  require_2fa: true
+  enable_2fa: false
+  require_2fa: false
   validated_activation_mode: true
   admins_can_disable: false
   totp_window: 2
@@ -35,3 +35,7 @@ SilverStripe\Admin\LeftAndMain:
     - 'camfindlay/silverstripe-twofactorauth: css/twofactorstyles.css'
   extra_requirements_javascript:
     - 'camfindlay/silverstripe-twofactorauth: js/twofactorinteractions.js'
+
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - '_2fa\Extensions\SiteConfigExtension'

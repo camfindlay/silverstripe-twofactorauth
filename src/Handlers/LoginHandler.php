@@ -2,6 +2,7 @@
 
 namespace _2fa;
 
+use _2fa\Authenticator;
 use SilverStripe\Forms\Form;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
@@ -9,13 +10,14 @@ use SilverStripe\Security\Member;
 use SilverStripe\Control\Director;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Security\Security;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\HTTPRequest;
+use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler as SS_LoginHandler;
 
 class LoginHandler extends SS_LoginHandler
 {
-
     private static $allowed_actions = [
         'step2',
         'secondStepForm',
@@ -32,10 +34,18 @@ class LoginHandler extends SS_LoginHandler
             $session = $request->getSession();
             $session->set('TwoFactorLoginHandler.MemberID', $member->ID);
             $session->set('TwoFactorLoginHandler.Data', $data);
-            if($member->Has2FA) {
+            if ($member->Has2FA) {
                 return $this->redirect($this->link('step2'));
-            } else {
+            }
+            if ($this->is2FArequired() && !$member->isDefaultAdmin()) {
+                // If member is default admin bypass the 2FA Requirement
                 return $this->redirect($this->link('twofactorsetup'));
+            }
+            if ($this->is2FAenabled()) {
+                // 2FA is enabled but no enforced log in as normal
+                $this->performLogin($member, $data, $request);
+            
+                return $this->redirectAfterSuccessfulLogin();
             }
         }
 
@@ -102,7 +112,6 @@ class LoginHandler extends SS_LoginHandler
 
             $data = $session->get('TwoFactorLoginHandler.Data');
             if (!$member) {
-
                 return $this->redirectBack();
             }
             $this->performLogin($member, $data, $request);
@@ -127,7 +136,7 @@ class LoginHandler extends SS_LoginHandler
     {
         $member = Security::getCurrentUser();
         
-        if(!$member->BackupTokens()->count()) {
+        if (!$member->BackupTokens()->count()) {
             $member->regenerateBackupTokens();
         }
         
@@ -162,7 +171,6 @@ class LoginHandler extends SS_LoginHandler
         if ($member->validateTOTP($data['SecondFactor'])) {
             $data = $session->get('TwoFactorLoginHandler.Data');
             if (!$member) {
-                
                 return $this->redirectBack();
             }
             $this->performLogin($member, $data, $request);
@@ -179,7 +187,7 @@ class LoginHandler extends SS_LoginHandler
         $session  = $this->request->getSession();
         $backURL = null;
         $data = $session->get('TwoFactorLoginHandler.Data');
-        if($data && isset($session->get('TwoFactorLoginHandler.Data')['BackURL'])) {
+        if ($data && isset($session->get('TwoFactorLoginHandler.Data')['BackURL'])) {
             $backURL = $session->get('TwoFactorLoginHandler.Data')['BackURL'];
         }
         if ($backURL && Director::is_site_url($backURL)) {
@@ -188,4 +196,17 @@ class LoginHandler extends SS_LoginHandler
         return parent::getBackURL();
     }
 
+    private function is2FArequired()
+    {
+
+        return (Config::inst()->get(Authenticator::class, 'require_2fa')
+            || SiteConfig::current_site_config()->require2fa);
+    }
+
+    private function is2FAenabled()
+    {
+        
+        return (Config::inst()->get(Authenticator::class, 'enable_2fa')
+            || SiteConfig::current_site_config()->enable2fa);
+    }
 }
