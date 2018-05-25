@@ -1,9 +1,9 @@
 <?php
 
 namespace _2fa;
+
 use SilverStripe\Security\Member;
 use SilverStripe\ORM\DataObject;
-
 
 /**
  * @property string $Value

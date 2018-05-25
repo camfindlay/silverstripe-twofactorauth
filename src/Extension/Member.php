@@ -13,7 +13,6 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 
-
 /**
  * @property \Member $owner
  * @property bool $Has2FA
@@ -160,11 +159,9 @@ class Member extends DataExtension
         foreach ($backup_token_list as $bt) {
             $bt->delete();
         }
-        foreach (range(1,Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
+        foreach (range(1, Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
             $token = BackupToken::create();
             $backup_token_list->add($token);
         }
     }
 }
-
-

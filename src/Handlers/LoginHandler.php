@@ -198,14 +198,12 @@ class LoginHandler extends SS_LoginHandler
 
     private function is2FArequired()
     {
-
         return (Config::inst()->get(Authenticator::class, 'require_2fa')
             || SiteConfig::current_site_config()->require2fa);
     }
 
     private function is2FAenabled()
     {
-        
         return (Config::inst()->get(Authenticator::class, 'enable_2fa')
             || SiteConfig::current_site_config()->enable2fa);
     }

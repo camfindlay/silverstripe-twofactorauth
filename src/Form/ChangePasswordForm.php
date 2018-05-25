@@ -19,7 +19,8 @@ class ChangePasswordForm extends SS_ChangePasswordForm
                 $member->logOut();
                 $form = $this->controller->LoginForm();
                 $form->sessionMessage(
-                    'Password successfully changed. Please login.', 'good'
+                    'Password successfully changed. Please login.',
+                    'good'
                 );
             }
         }

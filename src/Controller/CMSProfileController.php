@@ -1,6 +1,7 @@
 <?php
 
 namespace _2fa;
+
 use SilverStripe\Security\Member;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\LiteralField;
@@ -11,7 +12,7 @@ use SilverStripe\Core\Config\Config;
 use SilverStripe\Admin\CMSProfileController as SS_CMSProfileController;
 
 /**
- * Adds in handling of token creation and validation in the CMS 'My Profile' 
+ * Adds in handling of token creation and validation in the CMS 'My Profile'
  * section
  */
 class CMSProfileController extends SS_CMSProfileController
@@ -108,7 +109,8 @@ class CMSProfileController extends SS_CMSProfileController
 
         if ($member->Has2FA) {
             // add token QR code
-            $two_factor_fields[] = LiteralField::create('TokenSecurityWarning',
+            $two_factor_fields[] = LiteralField::create(
+                'TokenSecurityWarning',
                 _t(
                     "TWOFACTOR.TOKENSECURITYWARNING",
                     "<p><br>The button below reveals your security token for
@@ -143,7 +145,8 @@ class CMSProfileController extends SS_CMSProfileController
             // backup-token info
             $backup_token_fields[] = LiteralField::create(
                 'BackupTokensSecurityWarning',
-                _t("TWOFACTOR.BACKUPTOKENSECURITYWARNING",
+                _t(
+                    "TWOFACTOR.BACKUPTOKENSECURITYWARNING",
                     "<p><br>The button below reveals your backup tokens. These
                     can each be used only once.<br>
                     <strong>Please reveal them only when no one else is
@@ -219,7 +222,7 @@ class CMSProfileController extends SS_CMSProfileController
 
         // If we're in validated activation mode, this is the appropriate moment
         // to refresh the token
-        if(!$member->Has2FA) {
+        if (!$member->Has2FA) {
             // set new secret/token on member
             $member->generateTOTPToken();
             $member->write();
@@ -246,7 +249,7 @@ class CMSProfileController extends SS_CMSProfileController
             (string) $request->postVar('VerificationInput')
         );
 
-        if($TokenCorrect){
+        if ($TokenCorrect) {
             $member->Has2FA = true;
             $member->write();
 
@@ -285,7 +288,6 @@ class CMSProfileController extends SS_CMSProfileController
             (string) $request->postVar('VerificationInput')
         );
         if ($PasswordCorrect->isValid()) {
-
             $member->Has2FA = false;
             $member->write();
 
