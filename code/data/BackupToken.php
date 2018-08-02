@@ -2,12 +2,14 @@
 
 namespace _2fa;
 
+use SilverStripe\ORM\DataObject;
+
 /**
  * @property string $Value
  *
  * @method \Member Member()
  */
-class BackupToken extends \DataObject
+class BackupToken extends DataObject
 {
     private static $db = array(
         'Value' => 'Varchar',

@@ -2,7 +2,9 @@
 
 namespace _2fa;
 
-class CMSProfileController extends \CMSProfileController
+use SilverStripe\Security\Member;
+
+class CMSProfileController extends \SilverStripe\Admin\CMSProfileController
 {
     private static $allowed_actions = [
         'regenerate_backup_tokens',
@@ -15,7 +17,7 @@ class CMSProfileController extends \CMSProfileController
     public function getEditForm($id = null, $fields = null)
     {
         $form = parent::getEditForm($id, $fields);
-        $member = \Member::currentUser();
+        $member = Member::currentUser();
         if (!$member) {
             return $form;
         }

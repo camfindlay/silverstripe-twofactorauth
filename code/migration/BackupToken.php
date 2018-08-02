@@ -2,13 +2,15 @@
 
 namespace _91Carriage;
 
+use SilverStripe\ORM\DataObject;
+
 /**
  * This namespaced class is kept to provide for migration of data across tables.
  *
  * DEPRECATION WARNING: Ensure you use _2fa\BackupToken for any extensions of the modules code. 
  * This class will be removed at some point in the future (likely any 2.x release).
  **/
-class BackupToken extends \DataObject
+class BackupToken extends DataObject
 {
     private static $db = array(
         'Value' => 'Varchar',

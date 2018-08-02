@@ -5,6 +5,7 @@ namespace _2fa\Extensions;
 use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
 use Endroid\QrCode\QrCode;
+use SilverStripe\ORM\DataExtension;
 
 /**
  * @property \Member $owner
@@ -13,7 +14,7 @@ use Endroid\QrCode\QrCode;
  *
  * @method BackupToken BackupTokens()
  */
-class Member extends \DataExtension
+class Member extends DataExtension
 {
     private static $db = array(
         'Has2FA' => 'Boolean',

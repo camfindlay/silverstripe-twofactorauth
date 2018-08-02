@@ -4,8 +4,9 @@ namespace _2fa;
 
 use Session;
 use Director;
+use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 
-class LoginForm extends \MemberLoginForm
+class LoginForm extends MemberLoginForm
 {
     private static $allowed_actions = array('cancel');
 
