@@ -24,6 +24,8 @@ class BackupToken extends DataObject
         'Value',
     );
 
+    private static $table_name = "_91Carriage_BackupToken";
+
     /**
      * Migrates the old namespace to new.
      */

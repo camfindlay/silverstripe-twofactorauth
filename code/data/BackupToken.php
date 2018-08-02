@@ -27,6 +27,8 @@ class BackupToken extends DataObject
 
     private static $num_backup_tokens = 5;
 
+    private static $table_name = '_2fa_BackupToken';
+
     public function __construct($record = null, $isSingleton = false, $model = null)
     {
         parent::__construct($record, $isSingleton, $model);
