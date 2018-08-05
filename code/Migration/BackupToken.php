@@ -1,6 +1,6 @@
 <?php
 
-namespace _91Carriage;
+namespace _91Carriage\Migration;
 
 use SilverStripe\ORM\DataObject;
 
@@ -31,10 +31,10 @@ class BackupToken extends DataObject
      */
     public function requireDefaultRecords()
     {
-        $tokens = \_91Carriage\BackupToken::get();
+        $tokens = BackupToken::get();
         if ($tokens->exists()) {
             foreach ($tokens as $token) {
-                $migrate = \_2fa\BackupToken::create();
+                $migrate = \_2fa\DataObject\BackupToken::create();
                 $migrate->ID = $token->ID;
                 $migrate->Created = $token->Created;
                 $migrate->Value = $token->Value;

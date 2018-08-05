@@ -1,6 +1,6 @@
 <?php
 
-namespace _2fa;
+namespace _2fa\Form;
 
 use SilverStripe\Security\Member;
 

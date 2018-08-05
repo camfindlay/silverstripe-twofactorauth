@@ -1,11 +1,15 @@
 <?php
 
-namespace _2fa\Extensions;
+namespace _2fa\Extension;
 
 use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
 use Endroid\QrCode\QrCode;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\FieldList;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\Security\Permission;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * @property \Member $owner
@@ -22,7 +26,7 @@ class Member extends DataExtension
     );
 
     private static $has_many = array(
-        'BackupTokens' => '_2fa\BackupToken',
+        'BackupTokens' => '_2fa\DataObject\BackupToken',
     );
 
     private static $admins_can_disable = false;
@@ -33,7 +37,7 @@ class Member extends DataExtension
 
     public static function validated_activation_mode()
     {
-        return \Config::inst()->get(__CLASS__, 'validated_activation_mode');
+        return Config::inst()->get(__CLASS__, 'validated_activation_mode');
     }
 
     public function validateTOTP($token)
@@ -47,7 +51,7 @@ class Member extends DataExtension
         if (!$seed) {
             return true;
         }
-        $window = (int) \Config::inst()->get(__CLASS__, 'totp_window');
+        $window = (int) Config::inst()->get(__CLASS__, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
 
         $valid = $totp->validate($token);
@@ -92,9 +96,9 @@ class Member extends DataExtension
      * Allow other admins to turn off 2FA if it is set & admins_can_disable is set in the config.
      * 2FA in general is managed in the user's own profile.
      *
-     * @param \FieldList $fields
+     * @param FieldList $fields
      */
-    public function updateCMSFields(\FieldList $fields)
+    public function updateCMSFields(FieldList $fields)
     {
         // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
         if(!$this->owner->TOTPToken && self::validated_activation_mode()) {
@@ -104,7 +108,7 @@ class Member extends DataExtension
 
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
-        if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
+        if (!(Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && Permission::check('ADMIN'))) {
             $fields->removeByName('Has2FA');
         }
     }
@@ -142,7 +146,7 @@ class Member extends DataExtension
     public function getOTPUrl()
     {
         if (class_exists('SiteConfig')) {
-            $config = \SiteConfig::current_site_config();
+            $config = SiteConfig::current_site_config();
             $issuer = $config->Title;
         } else {
             $issuer = explode(':', $_SERVER['HTTP_HOST']);

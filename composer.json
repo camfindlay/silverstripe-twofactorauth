@@ -27,6 +27,11 @@
             "homepage": "http://oddnoc.github.io"
         }
 	],
+	"autoload": {
+		"psr-4": {
+			"_2fa\\": "code/"
+		}
+	},
 	"homepage": "https://github.com/camfindlay/silverstripe-twofactorauth",
 	"support": {
 		"issues": "https://github.com/camfindlay/silverstripe-twofactorauth/issues",
