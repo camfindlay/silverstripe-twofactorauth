@@ -1,40 +1,66 @@
 <?php
 
-namespace _2fa\Extensions;
+namespace _2fa\Extension;
 
 use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
 use Endroid\QrCode\QrCode;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Security\Permission;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
- * @property \Member $owner
+ * @property Member $owner
  * @property bool $Has2FA
  * @property string $TOTPToken
  *
- * @method BackupToken BackupTokens()
  */
-class Member extends \DataExtension
+class Member extends DataExtension
 {
+    /**
+     * @var array
+     */
     private static $db = array(
         'Has2FA' => 'Boolean',
         'TOTPToken' => 'Varchar(160)',
     );
 
+    /**
+     * @var array
+     */
     private static $has_many = array(
-        'BackupTokens' => '_2fa\BackupToken',
+        'BackupTokens' => '_2fa\DataObject\BackupToken',
     );
 
+    /**
+     * @var bool
+     */
     private static $admins_can_disable = false;
 
+    /**
+     * @var bool
+     */
     private static $validated_activation_mode = false;
 
+    /**
+     * @var int
+     */
     private static $totp_window = 2;
 
+    /**
+     * @return mixed
+     */
     public static function validated_activation_mode()
     {
-        return \Config::inst()->get(__CLASS__, 'validated_activation_mode');
+        return Config::inst()->get(__CLASS__, 'validated_activation_mode');
     }
 
+    /**
+     * @param $token
+     * @return bool
+     */
     public function validateTOTP($token)
     {
         assert(is_string($token));
@@ -46,7 +72,7 @@ class Member extends \DataExtension
         if (!$seed) {
             return true;
         }
-        $window = (int) \Config::inst()->get(__CLASS__, 'totp_window');
+        $window = (int) Config::inst()->get(__CLASS__, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
 
         $valid = $totp->validate($token);
@@ -71,6 +97,9 @@ class Member extends \DataExtension
         return $valid;
     }
 
+    /**
+     * @return string
+     */
     public function getPrintableTOTPToken()
     {
         $seed = $this->OTPSeed();
@@ -78,6 +107,9 @@ class Member extends \DataExtension
         return $seed ? $seed->getValue(Seed::FORMAT_BASE32) : '';
     }
 
+    /**
+     * @return Seed|void
+     */
     public function OTPSeed()
     {
         if ($this->owner->TOTPToken) {
@@ -91,9 +123,9 @@ class Member extends \DataExtension
      * Allow other admins to turn off 2FA if it is set & admins_can_disable is set in the config.
      * 2FA in general is managed in the user's own profile.
      *
-     * @param \FieldList $fields
+     * @param FieldList $fields
      */
-    public function updateCMSFields(\FieldList $fields)
+    public function updateCMSFields(FieldList $fields)
     {
         // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
         if(!$this->owner->TOTPToken && self::validated_activation_mode()) {
@@ -103,16 +135,22 @@ class Member extends \DataExtension
 
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
-        if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
+        if (!(Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && Permission::check('ADMIN'))) {
             $fields->removeByName('Has2FA');
         }
     }
 
+    /**
+     * @param array $labels
+     */
     public function updateFieldLabels(&$labels)
     {
         $labels['Has2FA'] = 'Enable Two Factor Authentication';
     }
 
+    /**
+     * @param int $bytes
+     */
     public function generateTOTPToken($bytes = 20)
     {
         $seed = Seed::generate($bytes);
@@ -130,6 +168,9 @@ class Member extends \DataExtension
         parent::onBeforeDelete();
     }
 
+    /**
+     *
+     */
     public function onBeforeWrite()
     {
         // regenerate token if Has2FA activated and not in validated_activation_mode
@@ -138,10 +179,13 @@ class Member extends \DataExtension
         }
     }
 
+    /**
+     * @return string
+     */
     public function getOTPUrl()
     {
         if (class_exists('SiteConfig')) {
-            $config = \SiteConfig::current_site_config();
+            $config = SiteConfig::current_site_config();
             $issuer = $config->Title;
         } else {
             $issuer = explode(':', $_SERVER['HTTP_HOST']);
@@ -157,6 +201,10 @@ class Member extends \DataExtension
         );
     }
 
+    /**
+     * @return string
+     * @throws \Endroid\QrCode\Exceptions\ImageFunctionUnknownException
+     */
     public function generateQRCode()
     {
         $qrCode = new QrCode();

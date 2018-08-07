@@ -1,23 +1,16 @@
 ---
 Name: 2fa
 ---
-Member:
+SilverStripe\Security\Member:
   extensions:
-    - '_2fa\Extensions\Member'
-Injector:
-  MemberLoginForm:
-    class: '_2fa\LoginForm'
-  ChangePasswordForm:
-    class: '_2fa\ChangePasswordForm'
-  CMSMemberLoginForm:
-    class: '_2fa\NonExistent'
-  CMSProfileController:
-    class: '_2fa\CMSProfileController'
-CMSSecurity:
-  reauth_enabled: false
-
-LeftAndMain:
-  extra_requirements_css:
-    - twofactorauth/css/twofactorstyles.css
-  extra_requirements_javascript:
-    - twofactorauth/js/twofactorinteractions.js
+    - _2fa\Extension\Member
+---
+Name: MFAAuth
+After:
+  - '#coresecurity'
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators:
+        default: '%$_2fa\Authenticator\MFAAuthenticator'
