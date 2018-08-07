@@ -2,6 +2,8 @@
 
 namespace _2fa\Controller;
 
+use _2fa\DataObject\BackupToken;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FormAction;
@@ -267,7 +269,7 @@ class CMSProfileController extends \SilverStripe\Admin\CMSProfileController
         foreach ($backup_token_list as $bt) {
             $bt->delete();
         }
-        foreach (range(1, \Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
+        foreach (range(1, Config::inst()->get('_2fa\DataObject\BackupToken', 'num_backup_tokens')) as $i) {
             $token = BackupToken::create();
             $backup_token_list->add($token);
         }

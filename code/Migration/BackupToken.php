@@ -12,18 +12,30 @@ use SilverStripe\ORM\DataObject;
  **/
 class BackupToken extends DataObject
 {
+    /**
+     * @var array
+     */
     private static $db = array(
         'Value' => 'Varchar',
     );
 
+    /**
+     * @var array
+     */
     private static $has_one = array(
         'Member' => 'Member',
     );
 
+    /**
+     * @var array
+     */
     private static $summary_fields = array(
         'Value',
     );
 
+    /**
+     * @var string
+     */
     private static $table_name = "_91Carriage_BackupToken";
 
     /**
@@ -46,12 +58,21 @@ class BackupToken extends DataObject
         }
     }
 
+    /**
+     * @return mixed|string
+     */
     public function getTitle()
     {
         return $this->Value;
     }
 
+    /**
+     * @var string
+     */
     private static $singular_name = 'OTP Backup Token';
 
+    /**
+     * @var bool
+     */
     private static $single_use = true;
 }
