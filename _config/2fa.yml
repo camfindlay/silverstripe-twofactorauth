@@ -12,6 +12,9 @@ _2fa\Authenticator:
 SilverStripe\Security\Member:
   extensions:
     - _2fa\Extensions\Member
+SilverStripe\Security\Group:
+  extensions:
+    - _2fa\Extensions\Group
 SilverStripe\Core\Injector\Injector:
   SilverStripe\Security\Security:
     properties:

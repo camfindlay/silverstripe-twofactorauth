@@ -37,7 +37,7 @@ class LoginHandler extends SS_LoginHandler
             if ($member->Has2FA) {
                 return $this->redirect($this->link('step2'));
             }
-            if ($this->is2FArequired() && !$member->isDefaultAdmin()) {
+            if ($this->is2FArequired($member) && !$member->isDefaultAdmin()) {
                 // If member is default admin bypass the 2FA Requirement
                 return $this->redirect($this->link('twofactorsetup'));
             }
@@ -196,9 +196,10 @@ class LoginHandler extends SS_LoginHandler
         return parent::getBackURL();
     }
 
-    private function is2FArequired()
+    private function is2FArequired($member)
     {
-        return (Config::inst()->get(Authenticator::class, 'require_2fa')
+        return  $member->is2FArequired()
+            || (Config::inst()->get(Authenticator::class, 'require_2fa')
             || SiteConfig::current_site_config()->require2fa);
     }
 

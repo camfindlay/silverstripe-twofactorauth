@@ -164,4 +164,19 @@ class Member extends DataExtension
             $backup_token_list->add($token);
         }
     }
+
+    /**
+     * Checks whether any of the member's Groups requrie to 2FA to log in
+     *
+     * @return boolean
+     */
+    public function is2FArequired()
+    {
+        foreach ($this->owner->Groups() as $group) {
+            if ($group->Require2FA) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
