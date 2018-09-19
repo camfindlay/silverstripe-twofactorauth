@@ -44,7 +44,7 @@ class LoginHandler extends SS_LoginHandler
                 return $this->redirect($this->link('twofactorsetup'));
             }
             if (Injector::inst()->get(Authenticator::class)->is2FAenabled()) {
-                // 2FA is enabled but no enforced log in as normal
+                // 2FA is enabled but not enforced log in as normal
                 $this->performLogin($member, $data, $request);
             
                 return $this->redirectAfterSuccessfulLogin();
@@ -110,6 +110,7 @@ class LoginHandler extends SS_LoginHandler
 
         if ($TokenCorrect) {
             $member->Has2FA = true;
+            $member->regenerateBackupTokens();
             $member->write();
 
             $data = $session->get('TwoFactorLoginHandler.Data');
