@@ -257,6 +257,7 @@ class CMSProfileController extends SS_CMSProfileController
 
         if ($TokenCorrect) {
             $member->Has2FA = true;
+            $member->regenerateBackupTokens();
             $member->write();
 
             $this->response
