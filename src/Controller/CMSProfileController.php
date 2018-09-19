@@ -2,13 +2,15 @@
 
 namespace _2fa;
 
-use SilverStripe\Security\Member;
-use SilverStripe\Forms\CheckboxField;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\ToggleCompositeField;
-use SilverStripe\Forms\FormAction;
+use _2fa\Authenticator;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Security\Member;
+use SilverStripe\Forms\FormAction;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\Forms\CheckboxField;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\Admin\CMSProfileController as SS_CMSProfileController;
 
 /**
@@ -49,6 +51,10 @@ class CMSProfileController extends SS_CMSProfileController
 
         // remove direct activation option
         $fields->removeByName('Has2FA');
+
+        if (!Injector::inst()->get(Authenticator::class)->is2FAenabled()) {
+            return $form;
+        }
 
         // activate/deactivate through button+popup instead
         $alterbutton = FormAction::create('open_deactivation_dialog')

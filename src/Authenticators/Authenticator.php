@@ -36,9 +36,16 @@ class Authenticator extends MemberAuthenticator
         return SS_LoginHandler::create($link, $this);
     }
 
-    private function is2FAenabled()
+    public function is2FAenabled()
     {
         return (Config::inst()->get(Authenticator::class, 'enable_2fa')
             || SiteConfig::current_site_config()->enable2fa);
+    }
+
+    public function is2FArequired($member)
+    {
+        return  $member->is2FArequired()
+            || (Config::inst()->get(Authenticator::class, 'require_2fa')
+            || SiteConfig::current_site_config()->require2fa);
     }
 }
