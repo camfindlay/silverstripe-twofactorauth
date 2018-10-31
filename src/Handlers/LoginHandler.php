@@ -13,6 +13,7 @@ use SilverStripe\Security\Security;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Security\MemberAuthenticator\MemberLoginForm;
 use SilverStripe\Security\MemberAuthenticator\LoginHandler as SS_LoginHandler;
 
@@ -46,7 +47,7 @@ class LoginHandler extends SS_LoginHandler
             if (Injector::inst()->get(Authenticator::class)->is2FAenabled()) {
                 // 2FA is enabled but not enforced log in as normal
                 $this->performLogin($member, $data, $request);
-            
+
                 return $this->redirectAfterSuccessfulLogin();
             }
         }
@@ -73,7 +74,7 @@ class LoginHandler extends SS_LoginHandler
     {
         return $this->redirectAfterSuccessfulLogin();
     }
-    
+
     public function twoFactorSetupFrom()
     {
         $session  = $this->request->getSession();
@@ -88,7 +89,7 @@ class LoginHandler extends SS_LoginHandler
                 ))
                 ->renderWith('TokenInfoDialog');
     }
-    
+
     /**
      * Function to allow verification & activation of two-factor-auth via Ajax
      *
@@ -138,11 +139,11 @@ class LoginHandler extends SS_LoginHandler
     public function show_backup_tokens()
     {
         $member = Security::getCurrentUser();
-        
+
         if (!$member->BackupTokens()->count()) {
             $member->regenerateBackupTokens();
         }
-        
+
         return [
             "Title" => 'Two Factor Back Up Tokens',
             "Content" => $member->customise(array(
@@ -151,7 +152,7 @@ class LoginHandler extends SS_LoginHandler
             ->renderWith('ShowBackUpTokens')
         ];
     }
-    
+
     public function secondStepForm()
     {
         return new Form(
@@ -177,14 +178,14 @@ class LoginHandler extends SS_LoginHandler
                 return $this->redirectBack();
             }
             $this->performLogin($member, $data, $request);
-            
+
             return $this->redirectAfterSuccessfulLogin();
         }
 
         // Fail to login redirects back to form
         return $this->redirectBack();
     }
-    
+
     public function getBackURL()
     {
         $session  = $this->request->getSession();
