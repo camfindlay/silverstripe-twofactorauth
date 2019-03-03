@@ -1,23 +1,44 @@
 ---
 Name: 2fa
+After:
+  - '#coresecurity'
 ---
-Member:
+_2fa\Authenticator:
+  enable_2fa: false
+  require_2fa: false
+  validated_activation_mode: true
+  admins_can_disable: false
+  totp_window: 2
+SilverStripe\Security\Member:
   extensions:
-    - '_2fa\Extensions\Member'
-Injector:
-  MemberLoginForm:
-    class: '_2fa\LoginForm'
-  ChangePasswordForm:
-    class: '_2fa\ChangePasswordForm'
-  CMSMemberLoginForm:
-    class: '_2fa\NonExistent'
-  CMSProfileController:
-    class: '_2fa\CMSProfileController'
-CMSSecurity:
+    - _2fa\Extensions\Member
+SilverStripe\Security\Group:
+  extensions:
+    - _2fa\Extensions\Group
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Security\Security:
+    properties:
+      Authenticators:
+        default: '%$_2fa\Authenticator'
+  SilverStripe\Security\CMSSecurity:
+    properties:
+      Authenticators:
+        cms: '%$_2fa\Authenticator'
+  SilverStripe\Security\MemberLoginForm:
+    class: _2fa\LoginForm
+  SilverStripe\Security\ChangePasswordForm:
+    class: _2fa\ChangePasswordForm
+  SilverStripe\Admin\CMSProfileController:
+    class: _2fa\CMSProfileController
+SilverStripe\Security\CMSSecurity:
   reauth_enabled: false
 
-LeftAndMain:
+SilverStripe\Admin\LeftAndMain:
   extra_requirements_css:
-    - twofactorauth/css/twofactorstyles.css
+    - 'camfindlay/silverstripe-twofactorauth: css/twofactorstyles.css'
   extra_requirements_javascript:
-    - twofactorauth/js/twofactorinteractions.js
+    - 'camfindlay/silverstripe-twofactorauth: js/twofactorinteractions.js'
+
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - '_2fa\Extensions\SiteConfigExtension'

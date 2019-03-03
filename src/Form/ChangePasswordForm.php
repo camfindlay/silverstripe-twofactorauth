@@ -2,9 +2,10 @@
 
 namespace _2fa;
 
-use Member;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\MemberAuthenticator\ChangePasswordForm as SS_ChangePasswordForm;
 
-class ChangePasswordForm extends \ChangePasswordForm
+class ChangePasswordForm extends SS_ChangePasswordForm
 {
     public function doChangePassword(array $data)
     {
@@ -18,7 +19,8 @@ class ChangePasswordForm extends \ChangePasswordForm
                 $member->logOut();
                 $form = $this->controller->LoginForm();
                 $form->sessionMessage(
-                    'Password successfully changed. Please login.', 'good'
+                    'Password successfully changed. Please login.',
+                    'good'
                 );
             }
         }

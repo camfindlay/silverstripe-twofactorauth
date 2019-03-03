@@ -2,9 +2,16 @@
 
 namespace _2fa\Extensions;
 
-use Rych\OTP\TOTP;
 use Rych\OTP\Seed;
+use Rych\OTP\TOTP;
+use _2fa\BackupToken;
+use _2fa\Authenticator;
 use Endroid\QrCode\QrCode;
+use SilverStripe\Forms\FieldList;
+use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Config\Config;
+use SilverStripe\Security\Permission;
+use SilverStripe\SiteConfig\SiteConfig;
 
 /**
  * @property \Member $owner
@@ -13,7 +20,7 @@ use Endroid\QrCode\QrCode;
  *
  * @method BackupToken BackupTokens()
  */
-class Member extends \DataExtension
+class Member extends DataExtension
 {
     private static $db = array(
         'Has2FA' => 'Boolean',
@@ -24,29 +31,15 @@ class Member extends \DataExtension
         'BackupTokens' => '_2fa\BackupToken',
     );
 
-    private static $admins_can_disable = false;
-
-    private static $validated_activation_mode = false;
-
-    private static $totp_window = 2;
-
-    public static function validated_activation_mode()
-    {
-        return \Config::inst()->get(__CLASS__, 'validated_activation_mode');
-    }
-
     public function validateTOTP($token)
     {
         assert(is_string($token));
 
-        if (!$this->owner->Has2FA) {
-            return true;
-        }
         $seed = $this->OTPSeed();
         if (!$seed) {
-            return true;
+            return false;
         }
-        $window = (int) \Config::inst()->get(__CLASS__, 'totp_window');
+        $window = (int) Config::inst()->get(Authenticator::class, 'totp_window');
         $totp = new TOTP($seed, array('window' => $window));
 
         $valid = $totp->validate($token);
@@ -58,12 +51,7 @@ class Member extends \DataExtension
                 $candidate_backup_token = $backup_tokens->first();
                 if ($token === $candidate_backup_token->Value) {
                     $valid = true;
-
-                    // Backup tokens should be unique;
-                    // ensure any duplicates are deleted when successfully used
-                    foreach ($backup_tokens as $bt) {
-                        $bt->delete();
-                    }
+                    $candidate_backup_token->delete();
                 }
             }
         }
@@ -71,14 +59,14 @@ class Member extends \DataExtension
         return $valid;
     }
 
-    public function getPrintableTOTPToken()
+    private function getPrintableTOTPToken()
     {
         $seed = $this->OTPSeed();
 
         return $seed ? $seed->getValue(Seed::FORMAT_BASE32) : '';
     }
 
-    public function OTPSeed()
+    private function OTPSeed()
     {
         if ($this->owner->TOTPToken) {
             return new Seed($this->owner->TOTPToken);
@@ -88,22 +76,28 @@ class Member extends \DataExtension
     }
 
     /**
-     * Allow other admins to turn off 2FA if it is set & admins_can_disable is set in the config.
+     * Allow other admins to turn off 2FA if it is set & admins_can_disable is
+     * set in the config.
      * 2FA in general is managed in the user's own profile.
      *
      * @param \FieldList $fields
      */
-    public function updateCMSFields(\FieldList $fields)
+    public function updateCMSFields(FieldList $fields)
     {
-        // Generate default token (allows scanning the QR at the moment of activation and (optionally) validate before activating 2FA)
-        if(!$this->owner->TOTPToken && self::validated_activation_mode()) {
+        // Generate default token (allows scanning the QR at the moment of
+        // activation and (optionally) validate before activating 2FA)
+        if (!$this->owner->TOTPToken
+            && Config::inst()->get(Authenticator::class, 'validated_activation_mode')
+        ) {
             $this->generateTOTPToken();
             $this->owner->write();
         }
 
         $fields->removeByName('TOTPToken');
         $fields->removeByName('BackupTokens');
-        if (!(\Config::inst()->get(__CLASS__, 'admins_can_disable') && $this->owner->Has2FA && \Permission::check('ADMIN'))) {
+        if (!(Config::inst()->get(Authenticator::class, 'admins_can_disable')
+            && $this->owner->Has2FA && Permission::check('ADMIN'))
+        ) {
             $fields->removeByName('Has2FA');
         }
     }
@@ -130,18 +124,10 @@ class Member extends \DataExtension
         parent::onBeforeDelete();
     }
 
-    public function onBeforeWrite()
+    private function getOTPUrl()
     {
-        // regenerate token if Has2FA activated and not in validated_activation_mode
-        if ($this->owner->isChanged('Has2FA', 2) && $this->owner->Has2FA && !self::validated_activation_mode()) {
-            $this->generateTOTPToken();
-        }
-    }
-
-    public function getOTPUrl()
-    {
-        if (class_exists('SiteConfig')) {
-            $config = \SiteConfig::current_site_config();
+        if (class_exists(SiteConfig::class)) {
+            $config = SiteConfig::current_site_config();
             $issuer = $config->Title;
         } else {
             $issuer = explode(':', $_SERVER['HTTP_HOST']);
@@ -162,12 +148,35 @@ class Member extends \DataExtension
         $qrCode = new QrCode();
         $qrCode->setText($this->getOTPUrl());
         $qrCode->setSize(175);
-        $qrCode->setPadding(10);
-        $data = $qrCode->get(QrCode::IMAGE_TYPE_GIF);
-        $data = base64_encode($data);
 
-        return sprintf('data:image/gif;base64,%s', $data);
+        return $qrCode->getDataUri();
+    }
+    
+    public function regenerateBackupTokens()
+    {
+        $member = $this->owner;
+        $backup_token_list = $member->BackupTokens();
+        foreach ($backup_token_list as $bt) {
+            $bt->delete();
+        }
+        foreach (range(1, Config::inst()->get('_2fa\BackupToken', 'num_backup_tokens')) as $i) {
+            $token = BackupToken::create();
+            $backup_token_list->add($token);
+        }
+    }
+
+    /**
+     * Checks whether any of the member's Groups requrie to 2FA to log in
+     *
+     * @return boolean
+     */
+    public function is2FArequired()
+    {
+        foreach ($this->owner->Groups() as $group) {
+            if ($group->Require2FA) {
+                return true;
+            }
+        }
+        return false;
     }
 }
-
-
