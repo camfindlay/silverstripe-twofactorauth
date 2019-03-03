@@ -10,6 +10,11 @@
     "security",
     "authentication"
   ],
+  "homepage": "https://github.com/camfindlay/silverstripe-twofactorauth",
+  "support": {
+    "issues": "https://github.com/camfindlay/silverstripe-twofactorauth/issues",
+    "source": "https://github.com/camfindlay/silverstripe-twofactorauth/tree/master"
+  },
   "require": {
     "rych/otp": "1.1.*",
     "endroid/qr-code": "1.3.*",
@@ -43,19 +48,12 @@
         "role": "Developer"
     }
   ],
-  "homepage": "https://github.com/camfindlay/silverstripe-twofactorauth",
-  "support": {
-    "issues": "https://github.com/camfindlay/silverstripe-twofactorauth/issues",
-    "source": "https://github.com/camfindlay/silverstripe-twofactorauth/tree/master",
-    "irc": "irc://irc.freenode.org/#silverstripe"
-  },
   "autoload": {
       "psr-4": {
           "_2fa\\": "src/"
       }
   },
   "extra": {
-    "installer-name": "twofactorauth",
     "expose": [
       "css",
       "js"
