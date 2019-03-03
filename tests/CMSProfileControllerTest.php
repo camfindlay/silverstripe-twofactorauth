@@ -13,7 +13,9 @@ use SilverStripe\CMS\Controllers\CMSMain;
 class CMSProfileControllerTest extends FunctionalTest
 {
     protected static $fixture_file = '2FAMemberTest.yml';
+
     protected $orig = array();
+
     public $autoFollowRedirection = false;
 
     public function __construct()
@@ -46,8 +48,13 @@ class CMSProfileControllerTest extends FunctionalTest
         $controller = CMSProfileController::create();
         $controller->setRequest(Controller::curr()->getRequest());
         $form = $controller->getEditForm($member->ID);
+
         $this->assertNull($form->Fields()->fieldByName('Root.TwoFactorAuthentication.BackupTokens'));
-        $this->assertInstanceOf(FormAction::class, $form->Fields()->fieldByName('Root.TwoFactorAuthentication.action_open_deactivation_dialog'));
+
+        $this->assertInstanceOf(
+            FormAction::class,
+            $form->Fields()->fieldByName('Root.TwoFactorAuthentication.action_open_deactivation_dialog')
+        );
     }
 
     public function testActivate2FA()
@@ -74,7 +81,7 @@ class CMSProfileControllerTest extends FunctionalTest
         // $member = $this->objFromFixture(Member::class, 'user1');
 
         // $this->assertTrue((bool)$member->Has2FA, 'Has2FA field was changed');
-        
+
         // // Get the form associated CMSProfileController
         // $controller = CMSProfileController::create();
         // $controller->setRequest(Controller::curr()->getRequest());
@@ -92,9 +99,9 @@ class CMSProfileControllerTest extends FunctionalTest
         $controller->setRequest(Controller::curr()->getRequest());
         $form       = $controller->getEditForm($member->ID);
         $this->assertNotNull($form->Fields()->fieldByName('Root.TwoFactorAuthentication.BackupTokens'));
-        
+
         $controller->regenerate_token(null, null);
-        
+
         $form = $controller->getEditForm($member->ID);
         $this->assertNull($form->Fields()->fieldByName('Root.TwoFactorAuthentication.BackupTokens'));
     }
