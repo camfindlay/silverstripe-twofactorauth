@@ -1,0 +1,39 @@
+language: php
+
+dist: precise
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
+php:
+ - 5.6
+
+env:
+  matrix:
+    - PHPUNIT_TEST=1
+    - PHPCS_TEST=1
+
+matrix:
+  include:
+    - php: 5.6
+      env: PHPUNIT_TEST=1
+    - php: 7.0
+      env: PHPUNIT_TEST=1
+    - php: 7.1.2
+      env: PHPUNIT_TEST=1
+
+before_script:
+  - export PATH=~/.composer/vendor/bin:$PATH
+  - composer validate
+  - composer install --dev --prefer-dist
+  - composer require --prefer-dist --no-update silverstripe/recipe-cms:1.0.x-dev
+  - composer update
+  - if [[ $PHPCS_TEST ]]; then composer global require squizlabs/php_codesniffer:^3 --prefer-dist --no-interaction --no-progress --no-suggest -o; fi
+  - phpenv rehash
+
+script:
+  - if [[ $PHPUNIT_TEST ]]; then vendor/bin/phpunit tests/php; fi
+  - if [[ $PHPCS_TEST ]]; then composer run-script lint; fi

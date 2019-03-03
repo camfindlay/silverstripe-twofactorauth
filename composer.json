@@ -53,6 +53,9 @@
           "_2fa\\": "src/"
       }
   },
+  "scripts": {
+    "lint": "phpcs --extensions=php src/ tests/"
+  },
   "extra": {
     "expose": [
       "css",
