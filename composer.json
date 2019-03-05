@@ -60,6 +60,8 @@
   "scripts": {
     "lint": "phpcs --extensions=php src/ tests/"
   },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
   "extra": {
     "expose": [
       "css",
