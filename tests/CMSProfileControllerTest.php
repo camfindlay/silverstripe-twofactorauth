@@ -32,17 +32,11 @@ class CMSProfileControllerTest extends FunctionalTest
         Config::nest();
         Config::inst()->update(Authenticator::class, 'enable_2fa', true);
         Member::set_password_validator(null);
-
-        // enable it
-        Config::nest();
-        Config::inst()->update(Authenticator::class, 'enable_2fa', true);
     }
 
     public function tearDown()
     {
         parent::tearDown();
-
-        Config::unnest();
     }
 
     public function testGetEditForm()
