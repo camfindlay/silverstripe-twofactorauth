@@ -73,7 +73,7 @@
       "docs/en/_images/2fa-backup.png"
     ],
     "branch-alias": {
-      "3.x-dev": "dev-master"
+      "dev-master": "3.x-dev"
     }
   }
 }
