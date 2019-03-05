@@ -29,6 +29,8 @@ class CMSProfileControllerTest extends FunctionalTest
         parent::setUp();
 
         // We're testing 2FA here so we don't need to enforce any password strength
+        Config::nest();
+        Config::inst()->update(Authenticator::class, 'enable_2fa', true);
         Member::set_password_validator(null);
 
         // enable it
@@ -56,11 +58,11 @@ class CMSProfileControllerTest extends FunctionalTest
         $controller->setRequest(Controller::curr()->getRequest());
         $form = $controller->getEditForm($member->ID);
 
-        $this->assertNull($form->Fields()->fieldByName('Root.TwoFactorAuthentication.BackupTokens'));
+        $this->assertNull($form->Fields()->dataFieldByName('BackupTokens'));
 
         $this->assertInstanceOf(
             FormAction::class,
-            $form->Actions()->fieldByName('Root.TwoFactorAuthentication.action_open_deactivation_dialog')
+            $form->Fields()->dataFieldByName('action_open_deactivation_dialog')
         );
     }
 
