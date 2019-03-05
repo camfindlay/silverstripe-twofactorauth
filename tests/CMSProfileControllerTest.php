@@ -9,6 +9,7 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Dev\FunctionalTest;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\CMS\Controllers\CMSMain;
+use SilverStripe\Core\Config\Config;
 
 class CMSProfileControllerTest extends FunctionalTest
 {
@@ -29,11 +30,17 @@ class CMSProfileControllerTest extends FunctionalTest
 
         // We're testing 2FA here so we don't need to enforce any password strength
         Member::set_password_validator(null);
+
+        // enable it
+        Config::nest();
+        Config::inst()->update(Authenticator::class, 'enable_2fa', true);
     }
 
     public function tearDown()
     {
         parent::tearDown();
+
+        Config::unnest();
     }
 
     public function testGetEditForm()
@@ -53,7 +60,7 @@ class CMSProfileControllerTest extends FunctionalTest
 
         $this->assertInstanceOf(
             FormAction::class,
-            $form->Fields()->fieldByName('Root.TwoFactorAuthentication.action_open_deactivation_dialog')
+            $form->Actions()->fieldByName('Root.TwoFactorAuthentication.action_open_deactivation_dialog')
         );
     }
 
@@ -89,7 +96,7 @@ class CMSProfileControllerTest extends FunctionalTest
         // $this->assertNotNull($form->Fields()->fieldByName('Root.TwoFactorAuthentication.BackupTokens'));
     }
 
-    public function test_regenerate_token()
+    public function testRegenerateToken()
     {
         $member = $this->objFromFixture(Member::class, 'user1');
         $this->logInAs($member);
